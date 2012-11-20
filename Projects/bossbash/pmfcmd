@@ -1,0 +1,137 @@
+#!/usr/bin/csh -f
+ 
+# Command file for the BOSS  program.  Execute by entering the following:
+# csh -e pmfcmd >& log &      
+#***********************************************************************
+echo '        MC simulation: pmf for Keto-Enol '
+echo '                    25 C & 1 atm '
+echo '                 Equilibration   5M '
+echo '                   Averaging    10M '
+echo '        CH3CN:  N =394  T=25  P=1  Rcut = 12 '
+#***********************************************************************
+#
+#nice +19
+set boss = ./BOSS-RM1
+set configurations = "100"
+
+# nsteps is the number of runs (allowed values: 1,2,5,10,25,50)
+set nsteps =  1
+# inc is the lambda increment x 100 - must be an integer
+@ inc = 50 / $nsteps
+@ lam0 = $inc
+set boxes = $BOSSdir
+#
+##### Enter a loop. Repeat until i < nsteps.
+set i = 0
+while ($i < $nsteps)
+
+setenv INFILE    d${lam0}in
+setenv UPFILE    d${lam0}up
+setenv SAVE      d${lam0}sv
+setenv AVERAGE   d${lam0}av
+setenv ZMATRIX   pmfzmat
+setenv SLVZMAT   slvzmat
+setenv BANGPAR   oplsaa.sb 
+setenv WATERBOX  watbox
+setenv ORG1BOX   org1box
+setenv ORG2BOX   org2box
+setenv SUMMARY   d${lam0}sum
+
+/bin/cp -f pmfpar tmppar
+cat oplsaa.par >> tmppar
+setenv PARAMETER tmppar
+
+# compute lambda values - csh doesn't know floating point, so
+        @ lam1 = $lam0 - $inc   
+        @ lam2 = $lam0 + $inc  
+        @ dec0 = $lam0 / 10
+        @ hun0 = $lam0 - $dec0 * 10 
+        @ dec1 = $lam1 / 10
+        @ hun1 = $lam1 - $dec1 * 10 
+        @ dec2 = $lam2 / 10
+        @ hun2 = $lam2 - $dec2 * 10 
+
+        set rc0 = 0.${dec0}${hun0}
+        set rc1 = 0.${dec1}${hun1}
+        set rc2 = 0.${dec2}${hun2}
+        if ($i == ( $nsteps - 1 )) set rc2 = 1.00
+        set lambda = "$rc0 $rc1 $rc2"
+
+date
+
+setenv OUTPUT    d${lam0}ota
+setenv PLTFILE   d${lam0}plta
+
+#    Equilibration  5M
+
+setenv OUTPUT    d${lam0}ota
+setenv PLTFILE   d${lam0}plta
+time $boss 111 $configurations $lambda
+/bin/cp -f d${lam0}sv d${lam0}sav
+foreach block (b c e2 a b c d a eq)
+        date
+        setenv OUTPUT    d${lam0}ot$block
+        setenv PLTFILE   d${lam0}plt$block
+        time $boss 001 $configurations $lambda
+        cat d${lam0}sv >>d${lam0}sav
+end
+
+#    Equilibration 15M
+#
+#setenv OUTPUT    d${lam0}ota
+#setenv PLTFILE   d${lam0}plta
+#time $boss 011 $configurations $lambda
+#/bin/cp -f d${lam0}sv d${lam0}sav
+#foreach block (b c e2 a b c d a e5 a b c d a e8 a b c eq)
+#        date
+#        setenv OUTPUT    d${lam0}ot$block
+#        setenv PLTFILE   d${lam0}plt$block
+#        time $boss 001 $configurations $lambda
+#        cat d${lam0}sv >>d${lam0}sav
+#end
+#
+#    Equilibration 35M
+#
+#setenv OUTPUT    d${lam0}ota
+#setenv PLTFILE   d${lam0}plta
+#time $boss 011 $configurations $lambda
+#/bin/cp -f d${lam0}sv d${lam0}sav
+#foreach block (b c e2 a b c d a e5 a b c d a e8 a b c eq)
+#        date
+#        setenv OUTPUT    d${lam0}ot$block
+#        setenv PLTFILE   d${lam0}plt$block
+#        time $boss 001 $configurations $lambda
+#        cat d${lam0}sv >>d${lam0}sav
+#end
+
+#    Averaging
+#
+#setenv OUTPUT    d${lam0}ota
+#setenv PLTFILE   d${lam0}plta
+#time $boss 011 $configurations $lambda
+#/bin/cp -f d${lam0}sv d${lam0}sav
+#foreach block (b c e2 a b c d a e5 a b c d a e8 a b c e10)
+#        date
+#        setenv OUTPUT    d${lam0}ot$block
+#        setenv PLTFILE   d${lam0}plt$block
+#        time $boss 001 $configurations $lambda
+#        cat d${lam0}sv >>d${lam0}sav
+#end
+
+rm d${lam0}sv 
+rm *otb *otc *otd *ota *sav *e2 *eq *e5 *e8
+rm *plta *pltb *pltc *pltd *plteq *plte2 *plte5 *plte8
+if ( $lam0 <= 9 ) mv d${lam0}sum d0${lam0}sum
+
+        set oldinc = $lam0
+
+        ##### lam0 is incremented 
+        @ lam0  = $lam0 +  2 * $inc
+        /bin/cp -f d${oldinc}in d${lam0}in
+
+        ##### increment 'i' by one.
+        @ i++
+end
+rm tmppar
+date
+exit

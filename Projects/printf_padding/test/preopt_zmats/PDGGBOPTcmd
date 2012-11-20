@@ -1,0 +1,35 @@
+#
+# Command file for the BOSS program.  Execute by entering the following:
+# csh PDGGBOPTcmd          
+#***********************************************************************
+echo '     Gas-Phase Optimization - PDDG/PM3'
+#***********************************************************************
+nice +19
+set boss = $BOSSdir/BOSS
+set configurations = "000000"
+set lambda = "0.000 0.000 0.000"
+set boxes = $BOSSdir
+#
+setenv INFILE    optin
+setenv UPFILE    optup
+setenv SAVE      svopt
+setenv AVERAGE   optav
+setenv ZMATRIX   optzmat
+setenv SLVZMAT   slvzmat
+if (-e PDGtmp) rm PDGtmp
+cp PDGGBOPTpar PDGtmp
+cat $BOSSdir/oplsaa.par >> PDGtmp
+setenv PARAMETER PDGtmp
+setenv BANGPAR   $BOSSdir/oplsaa.sb
+setenv WATERBOX  $boxes/watbox
+setenv ORG1BOX   $boxes/org1box
+setenv ORG2BOX   $boxes/org2box
+setenv SUMMARY   sum
+
+date
+
+setenv OUTPUT    out
+setenv PLTFILE   plt.pdb
+time $boss 211 $configurations $lambda
+rm slvzmat svopt optav optup optin PDGtmp
+exit
