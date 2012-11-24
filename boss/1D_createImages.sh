@@ -2,14 +2,16 @@
 
 # creates an images/ directory
 # copies plt files into the images directory
-# then unzips all the images. 
+# then unzips all the images, and renames them
+# a .pdb file.
 
-read -p "What is the first character of the names of the subdirectories? " CHAR
+read -p "What is the first character of the names of the subdirectories? " char
 
-SUBDIRS=$( find . -mindepth 1 -maxdepth 1 -type d | grep "./${CHAR}" | sort )
+subdirs=$( find . -mindepth 1 -maxdepth 1 -type d | grep "./${char}" | sort )
 
-for dir in $SUBDIRS ; do
+for dir in $subdirs ; do
 	cd $dir || exit 1
+    # if the log files exists and the images/ directory doesn't exist, then
 	if [ -e log -a ! -d images ] ; then
 		mkdir images
 		cp *plt* images/
