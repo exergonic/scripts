@@ -22,15 +22,31 @@
 # email: hpc@asc.edu
 #***************************************************************************
 
+usage()
+{
+    echo "Must give at least two arguments to this script."
+	echo "Usage: brung09 JOBFILE QUEUE"
+    echo "Invoke the command 'qlimits' to see a list of queues."
+    exit 1
+}
+
+
+# test to see that at two arguments are given
+if [[ "$#" -lt 2 ]] ; then
+    usage
+fi
+
 # configure script
 MOAB_BIN=`cat /opt/asn/bin/torque_dir.txt`
 
 #
+
 #  Message of the Day
 #echo "This runs Gaussian in the current directory via the queue system"
 #echo "Report problems and post questions to the HPC staff (hpc@asc.edu)"
 #echo " "
 pwddir=`pwd`
+
 # if no parameters input, go to "Usage is..."
 if test $# -ne 0
   then
@@ -53,7 +69,7 @@ if test $# -ne 0
 	# read queue time memory sttime num_cpus < qfile
 	# rm qfile
 
-
+# the queue name is given as the third argument
 if [ -n "$2" ] ; then 
 	case $2 in
 		"sp")
@@ -70,8 +86,7 @@ if [ -n "$2" ] ; then
 			;;
 	esac
 else
-	echo "Must specify a queue: small-parallel, etc."
-	echo "Usage: brung09 JOBFILE QUEUE"
+    usage
 	exit 0
 fi
 
