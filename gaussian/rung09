@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/bin/sh
 #=======================================================================
 #=====                                                             =====
 #=====   rung09 - Runs a gaussian job in the current directory     =====
@@ -22,31 +21,15 @@
 # email: hpc@asc.edu
 #***************************************************************************
 
-usage()
-{
-    echo "Must give at least two arguments to this script."
-	echo "Usage: brung09 JOBFILE QUEUE"
-    echo "Invoke the command 'qlimits' to see a list of queues."
-    exit 1
-}
-
-
-# test to see that at two arguments are given
-if [[ "$#" -lt 2 ]] ; then
-    usage
-fi
-
 # configure script
 MOAB_BIN=`cat /opt/asn/bin/torque_dir.txt`
 
 #
-
 #  Message of the Day
-#echo "This runs Gaussian in the current directory via the queue system"
-#echo "Report problems and post questions to the HPC staff (hpc@asc.edu)"
-#echo " "
+echo "This runs Gaussian in the current directory via the queue system"
+echo "Report problems and post questions to the HPC staff (hpc@asc.edu)"
+echo " "
 pwddir=`pwd`
-
 # if no parameters input, go to "Usage is..."
 if test $# -ne 0
   then
@@ -55,114 +38,40 @@ if test $# -ne 0
   if test -f $1
   then
 
-###### BILLY'S MODIFICATIONS ###################
+# Call nqsquery to choose pbs parameters for calculation
+# if you call with -s flag, it will list serial and route queues only
+#/apps/scripts/qquery -s
+#/apps/scripts/qquery 
+/apps/scripts/qquery program=gaussian input=$1
 
-### I DON'T WANT TO CALL QQUERY 
-### INSTEAD, I WANT THE VARIABLES SET AT THE
-### COMMAND LINE.
-
-#	# Call nqsquery to choose pbs parameters for calculation
-#	# if you call with -s flag, it will list serial and route queues only
-#	#/apps/scripts/qquery -s
-#	#/apps/scripts/qquery 
-	# /apps/scripts/qquery program=gaussian input=$1
-	# read queue time memory sttime num_cpus < qfile
-	# rm qfile
-
-# the queue name is given as the third argument
-if [ -n "$2" ] ; then 
-	case $2 in
-		"sp")
-			queue="small-parallel"
-			;;
-		"mp")
-			queue="med-parallel"
-			;;
-		"lp")
-			queue="large-parallel"
-			;;
-		*)
-			queue="$2"
-			;;
-	esac
-else
-    usage
-	exit 0
-fi
-
-# test to see if nprocshared has been given as argument,
-# otherwise, get it from jobfile.
-if [ -n "$3" ] ; then
-	num_cpus=$3
-else
-	num_cpus="$( grep -i nprocshared $1 | cut -d"=" -f2 | tr -d ' \t\f\r\n' )"
-fi
-
-# test to see if memory has been given as argument number 4,
-# otherwise, get it from jobfile.
-if [ -n "$4" ] ; then
-	memory="$4"
-else
-    memory="$( grep -i mem $1 | cut -d= -f2 | tr [:upper:] [:lower:] | tr -d ' \t\f\r\n')"
-fi
-
-#############################################
-
-
-### THIS SECTION WAS PASTED FROM QQUERY. IT SEEMS 
-### TO BE THE ONLY TRULY NECESSARY PART OF QQUERY
-### FOR MY PURPOSES.
-
-#-------------------------------------------------------------------
-# query user for time limit according to specified queue
-#-------------------------------------------------------------------
-
-if [ $num_cpus -eq "1" ]
+if [ -f qfile ]
 then
-  #  this uses num cpu * percpu time
-  pcput_time=`$MOAB_BIN/qmgr -c "list queue $queue" | grep resources_max.pcput | cut -c23- | cut -f1 -d:`
-  pcput_scaled=`echo $pcput_time $num_cpus | awk '{print $1 * $2 }'`
-  default_time=${pcput_scaled}":00:00"
+  read queue time memory sttime num_cpus < qfile
+  rm qfile
 else
-  # This uses 2/3 walltime 
-  pcput_time=`$MOAB_BIN/qmgr -c "list queue $queue" | grep resources_max.walltime | cut -c27- | cut -f1 -d:`
-  pcput_time=`echo $pcput_time $num_cpus | awk '{print $1 * $2 }'`
-
-  if [ $pcput_time -gt 1 ]
-  then
-    wall_scaled=`expr $pcput_time \* 2`
-    wall_scaled=`expr $wall_scaled / 3`
-  else
-    wall_scaled="01"
-  fi
-  default_time=${wall_scaled}":00:00"
+  echo "ERROR: qfile not found"
+  echo "       Make sure you have write permissions in this directory"
+  exit
 fi
 
-# check for no default, i.e. route queue
-if [ $pcput_time ]
+
+#*********************** LOAD PREFERENCES ****************
+# set defaults
+job_name_pref=PROMPT
+cluster_pref=PROMPT
+
+# Read queue preferences if available.
+if [ -f ~/.asc_queue ]
 then
-  junk=0
-else
-  # use small queue for shared, max for distributed
-  default_time=$TIME_ROUTE_DEFAULT
-  if [ "$queue"=="class" ]
-  then
-    default_time="01:00:00"
-  fi
-  if [ "$queue"=="express" ]
-  then
-    default_time="01:00:00"
-  fi
+  # source preferences file
+  source ~/.asc_queue
 fi
 
-#### END SECTION PASTED FROM QQUERY######################### 
-
-
-#### I WANT THE TIME TO BE THE DEFAULT TIME#################
-
-time="$default_time"
-
-###########################################################
+# error trap for make it qsub argument
+if [ "$cluster_pref" == "any" ]
+then
+  cluster_pref=uv:altix:dmc
+fi
 
 
 #**************** APPLICATION SPECIFIC *******************
@@ -189,15 +98,13 @@ fi
 
 parallel_num=`echo $parallel_num | tr -d ' \t\f\r\n'`
 #echo "checking parallel"
-if [ $parallel_num -ne $num_cpus ] 
+if test $parallel_num -ne $num_cpus
 then
   echo "You requested "$num_cpus" CPUs from the queue,"
   echo "but the input file is configured for "$parallel_num" CPUs."
   echo "Change either the queue request or %NProcShared or %NProcLinda setting to match."
   exit
 fi
-
-
 
 #echo "Checking for stacksize"
 
@@ -223,52 +130,58 @@ fi
 kstack=${kstack}"m"
 kstack2=${kstack2}"m"
 
-
-########################################################
-####I WANT THE OUTPUT FILE NAME TO BE THE INPUT FILE NAME
-
 #echo "Setting output file name"
 
-out_file=$1.log
+if test $# -eq 2
+then
+  out_file=$2
+else
+  out_file=$1.log
+fi
 
 
-### I WANT THE JOB NAME TO BE THE INPUT FILE NAME
+#echo "Generating default job name"
 
-	##echo "Generating default job name"
-	#
-	##
-	## Ask user for jobname
-	#echo ""
-	#def_jobname=$1"G09"
-	#def_jobname2=`echo $def_jobname | tr -d '.' | tr -d '-' | tr -d '_' | cut -c1-14`
-	#echo "Enter a name for your job (default: $def_jobname2)"
-	#read jobname
-	#if [ $jobname ]
-	#then
-	#  break
-	#else
-	#  jobname=$def_jobname2
-	#fi
+#
+# Ask user for jobname
+echo ""
+def_jobname=$1"G09"
+def_jobname2=`echo $def_jobname | tr -d '.' | tr -d '-' | tr -d '_' | cut -c1-14`
 
-jobname="${1%.*}"
-
-#######################################################
+if [ "$job_name_pref" == "PROMPT" ]
+then
+  echo "Enter a name for your job (default: $def_jobname2)"
+  read jobname
+  if [ $jobname ]
+  then
+    break
+  else
+    jobname=$def_jobname2
+  fi
+elif [ "$job_name_pref" == "DEFAULT" ]
+then
+  jobname=$def_jobname2
+  echo "The job name will be $jobname (can be changed in .asc_queue file)"
+  echo
+else
+  jobname=$job_name_pref
+  echo "The job name will be $jobname (from your .asc_queue preferences file)"
+  echo
+fi
 
 # get user name
 userid=`whoami`
 
-#### I DON'T NEED EXTRA OPTIONS
-	#/apps/scripts/special_queues $queue
-	#extra_options=`cat qfile2`
-	#rm qfile2
-	#if [ "$extra_options" == "exit" ]
-	#then
-	#  exit
-	#fi
-	#
+/apps/scripts/special_queues $queue
+extra_options=`cat qfile2`
+rm qfile2
+if [ "$extra_options" == "exit" ]
+then
+  exit
+fi
 
 #set_limits cpu_time num_nodes cpus_per_node memory license/NA file/NA
-if [ "$num_cpus" -eq "1" ]
+if [ "$num_cpus" == "1" ]
 then
   limits=`/apps/scripts/set_limits $time $num_cpus NA $memory NA NA`
 fi
@@ -279,47 +192,36 @@ then
 fi
 
 # this should work on all nodes, but I use this line to force it for testing
-#limits=$limits",partition=dmc"
+limits=$limits",partition=uv:altix:dmc"
+#limits=$limits",partition=uv"
 #limits=$limits",partition=altix,host=altix7"
 
 #echo "limits = "$limits
 
-# error trap for too many shared memory processors
-if [ "$num_cpus" -eq "72" ] 
-then
-  echo "ERROR: Shared memory jobs cannot use more than 72 CPUs"
-  exit
-fi
-
-#### I DIDN'T DO THE QQUERY SO I SET STTIME MANUALLY##############
-
-sttime=`date +%Y%m%d%H%M.%S`
-
-##################################################################
 #
 #
 #
 # Echo settings
-#echo " "
-#echo "============================================================"
-#echo "=====         Summary of your Gaussian job             ====="
-#echo "============================================================"
-#echo "  The input file is: " $1
-#echo "  The output file is: " $out_file
-#echo "  The time limit is " $time " HH:MM:SS."
-#echo "  The target directory is: " $pwddir
-#echo "  The memory limit is: " $memory
-#echo "  The number of CPUs is: " $num_cpus
-#echo "  The job will start running after: " $sttime
-#echo "  Look for: " $jobname " in queue: " $queue
-#echo " "
-#echo "The output file will not be placed in your directory,"
-#echo "until the job is complete."
-#echo " "
-#echo "Gaussian has default memory and disk use set for the small-serial queue."
-#echo "For other queues, set %mem and MaxDisk in your input file."
-#echo " "
-#echo -n "Job number "
+echo " "
+echo "============================================================"
+echo "=====         Summary of your Gaussian job             ====="
+echo "============================================================"
+echo "  The input file is: " $1
+echo "  The output file is: " $out_file
+echo "  The time limit is " $time " HH:MM:SS."
+echo "  The target directory is: " $pwddir
+echo "  The memory limit is: " $memory
+echo "  The number of CPUs is: " $num_cpus
+echo "  The job will start running after: " $sttime
+echo "  Look for: " $jobname " in queue: " $queue
+echo " "
+echo "The output file will not be placed in your directory,"
+echo "until the job is complete."
+echo " "
+echo "Gaussian has default memory and disk use set for the small-serial queue."
+echo "For other queues, set %mem and MaxDisk in your input file."
+echo " "
+echo -n "Job number "
 # Submit the job to the proper queue.
 #
 
@@ -514,4 +416,5 @@ else
   echo "Input checkpoint file must be named input_file.chk"
   echo " "
 fi
+
 
