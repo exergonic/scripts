@@ -38,18 +38,18 @@ def get_coordinates(species, atoms):
     whether the solute or the solvent.  The atoms should have been defined in
     the solute_atoms and solvent_atoms variables'''
 
-    arrays = []
+    atom_arrays = []
     coordinates = []
 
-    # scan through species for specific atom entry arrays
+    # scan through species for specific atom entry atom_arrays
     for entry in species:
         for atom in atoms:
             if atom in entry:
-                arrays.append(entry)
+                atom_arrays.append(entry)
 
-    # extract only the desired elements from the arrays and store them in
+    # extract only the desired elements from the atom_arrays and store them in
     # coordinates list.
-    for element in arrays:
+    for element in atom_arrays:
         array = element.split()
         coordinates.append(array[4])
         coordinates.append(array[5:8])
@@ -87,7 +87,7 @@ def crossproduct(vector1, vector2):
             vector1[0]*vector2[1]-vector1[1]*vector2[0]]
 
 def normal(coordinates):
-    ''' Given three coordinates, find the normal to the plane creates by the
+    ''' Given three coordinates, find the normal to the plane created by the
     three coordinates'''
 
     vector1 = vectorize(coordinates[0], coordinates[1])
