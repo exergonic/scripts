@@ -1,8 +1,6 @@
 #!/bin/bash
 
-PDB_FILES="$( find *.pdb )"
-
-for PDB in $PDB_FILES ; do
+for PDB in *.pdb ; do
 
 	# find the line number of the first occurence of the term TER.
 	TERLINE="$( grep --max-count=1 --line-number TER $PDB | cut -d ":" -f 1 )"

@@ -11,7 +11,7 @@
 #   	clean (c)  -- to clean the directories of junk.
 #	    edit  (e)  -- where sed does the magic.
 #       submit (s) -- submit to the que.
-#       go (g)     -- do misc user definted commands
+#       go (g)     -- do misc user defined commands
 # works for directories one level deep.
 # for 2 directories deep, see 2D_doit.sh
 
@@ -25,7 +25,7 @@ fi
 # function to define do'ing commands
 submit()
 {
-    jobname=$( grep "set jobname" *.csh | cut -d " " -f 4 )
+    jobname=$( grep "set jobname" *.csh | cut -d" " -f 4 )
     jobnumber=$( ~/scripts/runboss *.csh | cut -d "." -f "1" )
     echo running $dir
     echo "${jobname}     ${jobnumber}" >> ${localdir}/jobs.txt

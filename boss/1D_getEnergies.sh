@@ -23,8 +23,8 @@
 
 
 # the working directory and its subdirectories
-declare workdir="$PWD"
-declare dirs="$( find .  -mindepth 1 -maxdepth 1 -type d | grep [0-9] | sort )"
+workdir="$PWD"
+dirs="$( find .  -mindepth 1 -maxdepth 1 -type d | grep [0-9] | sort )"
 
 # check to see if user wants verbose output
 # rename the output text accordingly
@@ -48,7 +48,7 @@ printf "\n%s\n\n" "stardate = $(date)" >> "$sumfile"
 # and producing a summary file.
 for subdir in $dirs ; do
 	cd "$subdir" || exit 2
-    subdir="${subdir#./}" #chop off the initital ./ in fron tof the dir name
+    subdir="${subdir#./}" #chop off the initital ./ in fron top the dir name
 
 	# test to see if the BOSS log file exists
     # if it doesn't, it usually means the job isn't yet complete.

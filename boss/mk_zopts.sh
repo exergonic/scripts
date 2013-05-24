@@ -26,6 +26,12 @@
 #----------------------------------------------------------------------
 
 
+#Variables which are specific to every run and ought to be changed-----
+
+declare PREFIX="CH" # prefix appended to zmatrix names
+declare START="1.30"  # the initial bong length
+declare FINISH="1.50" # the final bond length
+declare INTERVAL="0.10" # intervals into which mutation will be divided
 
 # create a usage function to be printed if there are errors.
 usage()
@@ -87,12 +93,6 @@ declare ATOMNUMBER="$(( $LINENUMBER - 1 ))"
 declare NEWLINE="$( grep -n "Geometry Variations follow" $2 | cut -d: -f 1 )"
 declare NEWNUMBER="$( printf "%04d" "${ATOMNUMBER}" )"
 
-#Variables which are specific to every run and ought to be changed-----
-
-declare PREFIX="CH" # prefix appended to zmatrix names
-declare START="1.30"  # the initial bong length
-declare FINISH="1.50" # the final bond length
-declare INTERVAL="0.10" # intervals into which mutation will be divided
 
 #----------------------------------------------------------------------
 
@@ -152,7 +152,7 @@ createNewDir()
 	cp ${LOCALDIR}/*cmd .
 
 	# copy billy's go_xopt.sh script for full automation of the optimization to convergence
-        cp ${LOCALDIR}/go_xopt.sh .	
+    cp ${LOCALDIR}/go_xopt.sh .	
 
 	#copy the temporary zmatrix file to the working directory and rename it.
 	cp ${TEMPORARY_ZMAT} ./${NAME}.z 
@@ -168,7 +168,7 @@ createNewDir()
 	sed -i "${LINENUMBER}s/${X_STRING}/${BOND_LENGTH}/" ${NAME}.z
 
 	# time to optimize the zmatrix all the way to convergence.
-	# printf "%s\n" "Beginning optimization of ${NAME}."
+	 printf "%s\n" "Beginning optimization of ${NAME}."
 	./go_xopt.sh ${xACTION} ${NAME}.z 
 
 	# convert the final sum file to a pmfzmat 

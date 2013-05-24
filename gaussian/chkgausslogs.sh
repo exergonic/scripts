@@ -13,7 +13,7 @@
 #
 # chkgausslogs.sh {list of gaussian logs to check}
 # Many log files can be checked at once. The "*.log" argument will also 
-# work.
+# work. Bash expansion works as expected.
 #
 #----------------------------------------------------------------------
 

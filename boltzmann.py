@@ -2,7 +2,7 @@
 
 # Calculation Boltzmann population of conformers
 
-import sys, math 
+import sys, math
 
 if len(sys.argv[1:]) == 0:
     print("Input the deltaG values as arguments to this script.")
@@ -35,5 +35,5 @@ for delta_G in delta_Gs:
     percent_abundance = exponential(delta_G) / distribution * 100
     print("%.2f: %.2f%%" % (delta_G, percent_abundance))
 
-print("\nTotal equilibrium population energy: %f" 
+print("\nTotal equilibrium population energy: %f"
                              % equilibrium_population_energy)

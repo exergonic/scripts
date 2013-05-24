@@ -41,8 +41,8 @@ pyr_cations =  ['MPYR', 'EPYR', 'BPYR', 'HPYR', 'OPYR']
 # differently.  The OPLS_IL.par file must be changed.
 
 # methods, scaling factors, cutoffs
-methods = ['EWALD_equil']
-#,'NOEWALD','SF', 'SF_0.1', 'SF_0.2', 'SF_0.3','SP', 'SP_0.1','SP_0.2', 'SP_0.3', 'SFG', 'DC', 'CHARMM']
+methods = ['EWALD_equil', 'NOEWALD','SF', 'SF_0.1', 'SF_0.2', 'SF_0.3','SP',
+            'SP_0.1','SP_0.2', 'SP_0.3', 'SFG', 'DC', 'CHARMM']
 
 cutoffs = ['9A', '12A', '15A']
 
