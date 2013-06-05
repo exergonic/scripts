@@ -1,21 +1,38 @@
 #!/bin/bash
 
-# ----- ABOUT ----
+# ----- ABOUT ---- 
 # extracts supporting information from Gaussian output files.
-# gathers first row of frequency info for transition structures,
-# thermochemical data for transition strutures, and the condensed
-# summary at the end off the Gaussian output.  This is done by
-# looking for 'ASN' (perhaps unique to the Alabama Supercomputing
-# Authority ) and then the '\@' which ends the summary.  
+# gathers first row of frequency info for transition structures, thermochemical
+# data for transition strutures, and the condensed summary at the end of the
+# Gaussian output.  This is done by looking for 'ASN' (unique to the Alabama
+# Supercomputing Authority ) and then the '\@' which ends the summary, except
+# in the case of composite, thermochemical calculations, in which case it will
+# look for 'FreqCoords'. 
 #
-# This script will create a UNIX text document. For easier importing
-# into Microsoft Word, run unix2dos on the outfile.
+# This script will create a UNIX text document. For easier importing into
+# Microsoft Word, run unix2dos on the outfile.
 #
-# ---- INVOCATION --
+# ---- INVOCATION -- 
 # The script can take two arguments: 'ts' and 'comp'
 # 
+# 'ts' signifies that you need the usual thermochemical and condensed supp
+# info, as well as the first row of frequencies displaying the one negative
+# frequency.
 #
-# ------------------
+# 'comp' signifies that you've ran a thermochemical calculation.
+#
+# these two can be used in conjunction.
+#
+# examples: 
+# ./suppinfo.sh           <-- for a normal opt + freq job
+# ./suppinfo.sh ts        <-- for a ts job 
+# ./suppinfo.sh comp      <-- for a comp job 
+#  ./suppinfo.sh comp ts   <-- for a comp, ts job 
+#
+# AUTHOR: Billy Wayne McCann
+# EMAIL:  thebillywayne@gmail.com
+# LICENSE:  It's yours.
+------------------
 
 # exit script on first error
 set -e
@@ -35,7 +52,6 @@ if [[ ${#logfiles[@]} -eq 0 ]] ; then
     echo "Exiting."
     exit 0
 fi
-
 
 TS=false
 COMP=false
@@ -83,7 +99,6 @@ _thermo(){
     grep "Sum of electronic" $logfile >> $outfile
     echo "" >> $outfile
 }
-
 
 # extract condensed summary
 _si(){
