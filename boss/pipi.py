@@ -54,6 +54,7 @@ from sys import argv, exit
 from math import pow, degrees, sqrt, acos
 from sysconfig import get_python_version
 
+
 # make sure we're using at least version 3.2 of Python
 if float(get_python_version()) < 3.2:
     print("Requires Python 3.2 or higher.")
@@ -299,6 +300,8 @@ for accepted in sorted(solvent_data):
     output.write("{0:.2f}.\n".format(distance_stddev))
     output.write("Angle:  \t{0:.2f} +- ".format(average_angle))
     output.write("{0:.2f}.\n\n".format(angle_stddev))
+
+
 
 output.close()
 exit(0)
