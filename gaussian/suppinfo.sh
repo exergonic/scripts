@@ -27,7 +27,7 @@
 # ./suppinfo.sh           <-- for a normal opt + freq job
 # ./suppinfo.sh ts        <-- for a ts job 
 # ./suppinfo.sh comp      <-- for a comp job 
-#  ./suppinfo.sh comp ts   <-- for a comp, ts job 
+# ./suppinfo.sh comp ts   <-- for a comp, ts job 
 #
 # AUTHOR: Billy Wayne McCann
 # EMAIL:  thebillywayne@gmail.com
@@ -80,8 +80,8 @@ _comp(){
     # many condensed si info's are printed for composite
     # jobs. find the last one.
     begin_array=($(grep -n "ASN" $logfile | cut -d: -f1))
-    begin_element=$(( ${#begin_array[@]} - 1 ))
-    begin=${begin_array[$begin_element]}
+    final_element=$(( ${#begin_array[@]} - 1 ))
+    begin=${begin_array[$final_element]}
     end=$(grep -n "FreqCoord" $logfile | cut -d: -f1)
 
     sed -n "${begin},${end}p" $logfile >> $outfile
