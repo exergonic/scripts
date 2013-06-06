@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit script on first error
+set -e
+
 # ----- ABOUT ---- 
 # extracts supporting information from Gaussian output files.
 # gathers first row of frequency info for transition structures, thermochemical
@@ -32,17 +35,15 @@
 # AUTHOR: Billy Wayne McCann
 # EMAIL:  thebillywayne@gmail.com
 # LICENSE:  It's yours.
-------------------
+#------------------
 
-# exit script on first error
-set -e
 
 # output file
 outfile=supporting_info.txt
 [[ -f $outfile ]] && rm $outfile
 
 # make the logfiles all of the .log files in the current dir
-logfiles=($( find . -maxdepth 1 -name "*.log" ))
+logfiles=($(find . -maxdepth 1 -name "*.log"))
 
 # TESTS ######################################################################
 
