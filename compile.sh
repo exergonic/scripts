@@ -1,12 +1,15 @@
 #!/bin/bash
 
 src=${1}
-out=${src%.*}.exe
+out=${src%.*}.o
+
+fortoptions="-Wall -Wextra -Wimplicit-interface -Werror \
+    -O3 -march=native -ffast-math -funroll-loops"
 
 case ${src##*.} in
-	f|f90|f03|F)
+	f|f90|f03|f95|F)
 		[[ -e $output ]] && builtin rm $output 
-		gfortran $src -o $out && \
+		gfortran $fortoptions $src -o $out && \
             echo "compile successful: $out produced"
 		;;
 	*)
@@ -14,3 +17,9 @@ case ${src##*.} in
 		exit 0
 		;;
 esac
+
+read -p "Attempt to execute? (Y|N)   " response
+response=$( echo $response | tr [:upper:] [:lower:] )
+if [[ "$response" == "y" ]] ; then
+    ./$out
+fi
