@@ -250,7 +250,7 @@ for pdb in pdbs:
         j = 0
         for solvent in solvents:
             solvent_name, solvent_coordinates = get_coordinates(solvent, solvent_atoms)
-            
+
             if solvent_coordinates is None:
                 continue
 
