@@ -186,8 +186,8 @@ for pdb in pdbs:
             else:
                 continue
 
-    print('''PDB {0} contains {1} solvent atoms of
-             interest within the cutoff.'''.format(pdb, n))
+    print("PDB {0} contains {1} solvent atoms of".format(pdb, n))
+    print(" interest within the cutoff.")
     output.write("PDB {0} contains {1} solvent atoms of".format(pdb, n))
     output.write(" interest within the cutoff.\n")
 
