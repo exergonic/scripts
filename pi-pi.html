@@ -1,0 +1,330 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+          "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title> boss/pipi.py </title>
+<style type="text/css">
+.defname {color: blue;}
+.comment {color: crimson;}
+.builtin {color: purple;}
+.definition {color: darkorange; font-weight:bold;}
+.operator {color: brown;}
+.docstring {color: forestgreen; font-style:italic}
+.keyword {color: darkorange;}
+.string {color: forestgreen;}
+</style>
+</head>
+<body>
+<pre class="python">
+<span class="comment">#!/usr/bin/env python3</span>
+
+<span class="comment">## README #####################################################################</span>
+<span class="comment"># </span>
+<span class="comment"># This script is meant to measure pi-pi stacking between the solute and solvent</span>
+<span class="comment"># atoms. It will evaluate only those solvent atoms within a certain cutoff,</span>
+<span class="comment"># defined by the user (below).</span>
+
+cutoff <span class="operator">=</span> 10.0
+
+<span class="comment"># This cutoff distance is based upon the approximated center of the ring</span>
+<span class="comment"># containing the pi system. The center is approximated by using two of the</span>
+<span class="comment"># three coordinates given by the user. The two atoms which will approximate the</span>
+<span class="comment"># center need to be the second and third atoms defined in the lists below. The</span>
+<span class="comment"># atoms are defined by the atom labels as they appear in the pdb file. Please</span>
+<span class="comment"># note, this script works with pdb files ONLY.</span>
+
+solute_atoms <span class="operator">=</span> [<span class="string">'S00'</span>, <span class="string">'C01'</span>, <span class="string">'C04'</span>]
+solvent_atoms <span class="operator">=</span> [<span class="string">'C05'</span>, <span class="string">'N04'</span>, <span class="string">'N06'</span>]
+
+<span class="comment"># Please ensure that all three atoms are in the aromatic ring, as these three</span>
+<span class="comment"># atoms will be used to form the plane in which the pi system lies.   </span>
+<span class="comment"># </span>
+<span class="comment"># The script will find the angles between the planes involved in the (hopefully</span>
+<span class="comment"># found) pi-pi stacking, as well as take an average and standard deviation.</span>
+<span class="comment"># Output for every solvent molecule evaluated is printed in an output file</span>
+<span class="comment"># named 'output_pi-pi.txt'.</span>
+<span class="comment"># </span>
+<span class="comment"># !!The above two variables should be all that is required for the user to</span>
+<span class="comment"># change!!</span>
+<span class="comment">#</span>
+<span class="comment">## INVOCATION #################################################################</span>
+<span class="comment"># </span>
+<span class="comment"># Ensure that the script is marked executable or explicitly invoke python</span>
+<span class="comment"># (version 3.2 minimal) to run the script.  Any pdb file which you'd like to</span>
+<span class="comment"># analyze should be given as an argument. Shell expansion is handled</span>
+<span class="comment"># appropriately.</span>
+<span class="comment"># </span>
+<span class="comment"># Example:</span>
+<span class="comment"># ./pipi.py *pdb</span>
+<span class="comment"># ./pipi.py d50plt5 d50plt10 d50plt15</span>
+<span class="comment">#</span>
+<span class="comment"># Note that the filenames do not need a pdb suffix, but the script relies on</span>
+<span class="comment"># the pdb format.  </span>
+<span class="comment">##############################################################################</span>
+<span class="comment">#</span>
+<span class="comment"># Author: Billy Wayne McCann</span>
+<span class="comment"># email : thebillywayne@gmail.com</span>
+<span class="comment"># NOTE:  My code is purposefully verbose. don't hate. </span>
+<span class="comment">###############################################################################</span>
+
+
+<span class="definition">from</span> sys <span class="definition">import</span> argv, <span class="builtin">exit</span>
+<span class="definition">from</span> math <span class="definition">import</span> <span class="builtin">pow</span>, degrees, sqrt, acos
+<span class="definition">from</span> sysconfig <span class="definition">import</span> get_python_version
+
+
+<span class="comment"># make sure we're using at least version 3.2 of Python</span>
+<span class="keyword">if</span> <span class="builtin">float</span>(get_python_version()) <span class="operator">&</span>lt; 3.2:
+    <span class="builtin">print</span>(<span class="string">"Requires Python 3.2 or higher."</span>)
+    <span class="builtin">exit</span>(0)
+
+
+<span class="comment"># make sure arguments have been given to the script</span>
+<span class="keyword">if</span> <span class="builtin">len</span>(argv[1:]) <span class="operator">==</span> 0:
+    <span class="builtin">print</span>(<span class="string">"Give pdb files as an argument to this script."</span>)
+    <span class="builtin">exit</span>(0)
+<span class="keyword">else</span>:
+    pdbs <span class="operator">=</span> argv[1:]
+
+
+<span class="comment"># species are separated in the pdb file by 'TER   '</span>
+ter <span class="operator">=</span> <span class="string">'TER   '</span>
+
+<span class="comment"># file in which to place output</span>
+output <span class="operator">=</span> <span class="builtin">open</span>(<span class="string">'output_pi-pi.txt'</span>, <span class="string">'w'</span>)
+
+<span class="comment">###  FUNCTIONS  ###############################################################</span>
+
+<span class="definition">def</span> <span class="defname">find_TERs</span>(content):
+    <span class="docstring">''' Find where the TER's in the pdb file occur'''</span>
+
+    terlines <span class="operator">=</span> []
+    terline <span class="operator">=</span> content.index(ter)
+    terlines.append(terline)
+    <span class="keyword">while</span> <span class="keyword">True</span>:
+        <span class="keyword">try</span>:
+            terline <span class="operator">=</span> content.index(ter, terline<span class="operator">+</span>1)
+            terlines.append(terline)
+        <span class="keyword">except</span>:
+            <span class="keyword">return</span> terlines
+
+<span class="definition">def</span> <span class="defname">get_coordinates</span>(species, atoms):
+    <span class="docstring">''' Find coordinates of atoms of interest of the species of interest,
+    whether the solute or the solvent.  The atoms should have been defined in
+    the solute_atoms and solvent_atoms variables'''</span>
+
+    atom_arrays <span class="operator">=</span> []
+    coordinates <span class="operator">=</span> []
+
+    <span class="comment"># scan through species for specific atom entry and store into atom_arrays</span>
+    <span class="keyword">for</span> entry <span class="keyword">in</span> species:
+        <span class="keyword">for</span> atom <span class="keyword">in</span> atoms:
+            <span class="keyword">if</span> atom <span class="keyword">in</span> entry:
+                atom_arrays.append(entry)
+
+    <span class="comment"># extract only the desired elements from the atom_arrays and store them in</span>
+    <span class="comment"># coordinates list.</span>
+    <span class="keyword">for</span> element <span class="keyword">in</span> atom_arrays:
+        array <span class="operator">=</span> element.split()
+        coordinates.append(array[4])
+        coordinates.append(array[5:8])
+
+    <span class="comment"># in binary solvents, the coordinates will sometimes not be found in a</span>
+    <span class="comment"># particular solvent molecule. return None and test for it in the main</span>
+    <span class="comment"># body.</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> coordinates:
+        <span class="keyword">return</span> [<span class="keyword">None</span>,<span class="keyword">None</span>] 
+
+    <span class="comment"># the molecular id is the first entry in the coordinates list</span>
+    mol_id <span class="operator">=</span> coordinates[0]
+
+    <span class="comment"># the actual coordinates are the even entries in the coordinates list</span>
+    coordinates <span class="operator">=</span> [coordinates[i] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="builtin">len</span>(coordinates)) <span class="keyword">if</span> <span class="builtin">float</span>(i)
+                    <span class="operator">%</span> 2 <span class="operator">!=</span> 0]
+    <span class="keyword">return</span> mol_id, coordinates
+
+<span class="definition">def</span> <span class="defname">vectorize</span>(coordinate1, coordinate2):
+    <span class="docstring">'''Take coordinates and return a vector'''</span>
+
+    <span class="comment"># extract x, y, z values from coordinates</span>
+    <span class="comment"># make them floats for the subtraction operations in the return statement</span>
+    x1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[0])
+    x2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[0])
+    y1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[1])
+    y2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[1])
+    z1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[2])
+    z2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[2])
+    <span class="keyword">return</span> [x2<span class="operator">-</span>x1, y2<span class="operator">-</span>y1, z2<span class="operator">-</span>z1]
+
+<span class="definition">def</span> <span class="defname">dotproduct</span>(vector1, vector2):
+    <span class="docstring">'''Return the dot product between two vectors'''</span>
+
+    <span class="keyword">return</span> vector1[0]<span class="operator">*</span>vector2[0]<span class="operator">+</span>vector1[1]<span class="operator">*</span>vector2[1]<span class="operator">+</span>vector1[2]<span class="operator">*</span>vector2[2]
+
+<span class="definition">def</span> <span class="defname">crossproduct</span>(vector1, vector2):
+    <span class="docstring">'''Find the cross product between two vectors'''</span>
+
+    <span class="keyword">return</span> [vector1[1]<span class="operator">*</span>vector2[2]<span class="operator">-</span>vector1[2]<span class="operator">*</span>vector2[1],
+            vector1[2]<span class="operator">*</span>vector2[0]<span class="operator">-</span>vector1[0]<span class="operator">*</span>vector2[2],
+            vector1[0]<span class="operator">*</span>vector2[1]<span class="operator">-</span>vector1[1]<span class="operator">*</span>vector2[0]]
+
+<span class="definition">def</span> <span class="defname">magnitude</span>(vector):
+    <span class="docstring">'''Return the magnitude of a vector'''</span>
+
+    <span class="keyword">return</span> sqrt(vector[0]<span class="operator">*</span>vector[0]<span class="operator">+</span>vector[1]<span class="operator">*</span>vector[1]<span class="operator">+</span>
+            vector[2]<span class="operator">*</span>vector[2])
+
+<span class="definition">def</span> <span class="defname">unit</span>(vector):
+    <span class="docstring">'''Return the unit vector of a vector'''</span>
+
+    mag <span class="operator">=</span> magnitude(vector)
+    unit_vector <span class="operator">=</span> []
+    <span class="keyword">for</span> scalar <span class="keyword">in</span> vector:
+        unit_vector.append(scalar<span class="operator">/</span>mag)
+    <span class="keyword">return</span> unit_vector
+
+<span class="definition">def</span> <span class="defname">center</span>(coordinate1, coordinate2):
+    <span class="docstring">''' Given two coordinates, find the midpoint between them. 
+    This function is used to approximate the center of a species. '''</span>
+    x1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[0])
+    x2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[0])
+    y1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[1])
+    y2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[1])
+    z1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[2])
+    z2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[2])
+
+    <span class="keyword">return</span> [(x2<span class="operator">+</span>x1)<span class="operator">/</span>2, (y2<span class="operator">+</span>y1)<span class="operator">/</span>2, (z2<span class="operator">+</span>z1)<span class="operator">/</span>2]
+
+<span class="definition">def</span> <span class="defname">distance</span>(coordinate1, coordinate2):
+    <span class="docstring">''' Find the distance between two points'''</span>
+    x1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[0])
+    x2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[0])
+    y1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[1])
+    y2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[1])
+    z1 <span class="operator">=</span> <span class="builtin">float</span>(coordinate1[2])
+    z2 <span class="operator">=</span> <span class="builtin">float</span>(coordinate2[2])
+
+    <span class="keyword">return</span> sqrt((x2<span class="operator">-</span>x1)<span class="operator">**</span>2 <span class="operator">+</span> (y2<span class="operator">-</span>y1)<span class="operator">**</span>2 <span class="operator">+</span> (z2<span class="operator">-</span>z1)<span class="operator">**</span>2)
+
+<span class="definition">def</span> <span class="defname">normal</span>(coordinates):
+    <span class="docstring">''' Given three coordinates, find the normal to the plane created by the
+    three coordinates'''</span>
+
+    vector1 <span class="operator">=</span> vectorize(coordinates[0], coordinates[1])
+    vector2 <span class="operator">=</span> vectorize(coordinates[1], coordinates[2])
+
+    <span class="keyword">return</span> crossproduct(vector1, vector2)
+
+<span class="definition">def</span> <span class="defname">calculate_angle</span>(normal1, normal2):
+    <span class="docstring">''' Calculate the angle between two planes.'''</span>
+
+    <span class="comment"># make normals into unit vectors first</span>
+    normal1 <span class="operator">=</span> unit(normal1)
+    normal2 <span class="operator">=</span> unit(normal2)
+
+    <span class="comment"># the angle between the two planes of atomic coordinates</span>
+    <span class="comment"># is the arccosine of dot product of the two normals.</span>
+    <span class="keyword">return</span>  degrees(acos(dotproduct(normal1, normal2)))
+
+
+<span class="definition">def</span> <span class="defname">stddev</span>(all_values, average_value):
+    <span class="docstring">'''Find the standard deviation of the angles'''</span>
+
+    <span class="comment"># create a new list which is the difference between the average of the</span>
+    <span class="comment"># values and each individual value.</span>
+    square_diff_from_average <span class="operator">=</span> [<span class="builtin">pow</span>((i<span class="operator">-</span>average_value), 2) <span class="keyword">for</span> i <span class="keyword">in</span> all_values]
+
+    <span class="comment"># the standard deviation is square root of the sum of the differences</span>
+    <span class="comment"># between each each value and the average squared divided by the number of</span>
+    <span class="comment"># values in the list ('population' standard deviation).</span>
+    <span class="keyword">return</span> sqrt(<span class="builtin">sum</span>(square_diff_from_average)<span class="operator">/</span><span class="builtin">len</span>(square_diff_from_average))
+
+
+<span class="comment">## MAIN  ######################################################################</span>
+
+<span class="comment"># initialize dictionary to store solvent data into</span>
+solvent_data <span class="operator">=</span> {} 
+
+<span class="builtin">print</span>(<span class="string">"Using a cutoff of {0} Angstroms."</span>.format(cutoff))
+output.write(<span class="string">"Using a cutoff of {0} Angstroms.\n\n"</span>.format(cutoff))
+
+<span class="keyword">for</span> pdb <span class="keyword">in</span> pdbs:
+    <span class="keyword">with</span> <span class="builtin">open</span>(pdb, <span class="string">'r'</span>) <span class="keyword">as</span> pdb_file:
+        contents <span class="operator">=</span> pdb_file.read().split(<span class="string">'\n'</span>)
+        TERlines <span class="operator">=</span> find_TERs(contents)
+
+        <span class="comment"># find solutes coordinates, center, and normal vector</span>
+        solute <span class="operator">=</span> contents[0:TERlines[0]]
+        solute_coordinates <span class="operator">=</span> get_coordinates(solute, solute_atoms)[1]
+        solute_center <span class="operator">=</span> center(solute_coordinates[1], solute_coordinates[2]) 
+        solute_normal <span class="operator">=</span> normal(solute_coordinates)
+
+        solvents <span class="operator">=</span> []
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="builtin">len</span>(TERlines)<span class="operator">-</span>1):
+            solvent <span class="operator">=</span> contents[TERlines[i]:TERlines[i<span class="operator">+</span>1]]
+            solvents.append(solvent)
+
+        <span class="comment"># keep track of how many solvents are within cutoff in each pdb</span>
+        j <span class="operator">=</span> 0
+        <span class="keyword">for</span> solvent <span class="keyword">in</span> solvents:
+            solvent_name, solvent_coordinates <span class="operator">=</span> get_coordinates(solvent, solvent_atoms)
+            
+            <span class="keyword">if</span> solvent_coordinates <span class="keyword">is</span> <span class="keyword">None</span>:
+                <span class="keyword">continue</span>
+
+            solvent_name <span class="operator">=</span> <span class="builtin">int</span>(solvent_name)
+            solvent_center <span class="operator">=</span> center(solvent_coordinates[1],
+                                    solvent_coordinates[2])
+            radius <span class="operator">=</span> distance(solute_center, solvent_center)
+
+            <span class="keyword">if</span> radius <span class="operator">&</span>lt; cutoff:
+                solvent_normal <span class="operator">=</span> normal(solvent_coordinates)
+                angle <span class="operator">=</span> calculate_angle(solute_normal, solvent_normal)
+                <span class="keyword">if</span> solvent_name <span class="keyword">not</span> <span class="keyword">in</span> solvent_data:
+                    solvent_data[solvent_name] <span class="operator">=</span> {<span class="string">'pdb'</span>: [], 
+                            <span class="string">'distance'</span>: [], <span class="string">'angle'</span>: []}
+                solvent_data[solvent_name][<span class="string">'pdb'</span>].append(pdb)
+                solvent_data[solvent_name][<span class="string">'distance'</span>].append(radius)
+                solvent_data[solvent_name][<span class="string">'angle'</span>].append(angle)
+                j <span class="operator">+=</span> 1
+
+            <span class="keyword">else</span>:
+                <span class="keyword">continue</span>
+
+        <span class="builtin">print</span>(<span class="string">"PDB {0} contains {1} solvent(s) within the cutoff."</span>.format(pdb, j))
+        output.write(<span class="string">"PDB {0} contains {1} solvent(s) within the cutoff.\n"</span>.format(pdb, j))
+
+<span class="comment"># end of for pdb loop</span>
+
+output.write(<span class="string">"\n"</span>)
+
+
+<span class="comment"># analyze the accepted solvent data.</span>
+<span class="keyword">for</span> accepted <span class="keyword">in</span> <span class="builtin">sorted</span>(solvent_data):
+    output.write(<span class="string">'Solvent ID: {0}\n'</span>.format(accepted))
+
+    <span class="keyword">for</span> index <span class="keyword">in</span> <span class="builtin">range</span>(<span class="builtin">len</span>(solvent_data[accepted][<span class="string">'pdb'</span>])):
+        output.write(<span class="string">'+ PDB name: {0}\t\t'</span>.format(solvent_data[accepted][<span class="string">'pdb'</span>][index]))
+        output.write(<span class="string">'Distance: {0:.2f}\t'</span>.format(solvent_data[accepted][<span class="string">'distance'</span>][index]))
+        output.write(<span class="string">'Angle: {0:.2f}\t\n'</span>.format(solvent_data[accepted][<span class="string">'angle'</span>][index]))
+
+    output.write(<span class="string">'== AVERAGES ==\n'</span>)
+    average_distance <span class="operator">=</span> <span class="builtin">sum</span>(solvent_data[accepted][<span class="string">'distance'</span>])<span class="operator">/</span><span class="builtin">len</span>(solvent_data[accepted][<span class="string">'distance'</span>])
+    distance_stddev <span class="operator">=</span> stddev(solvent_data[accepted][<span class="string">'distance'</span>],
+                                average_distance)
+    average_angle <span class="operator">=</span> <span class="builtin">sum</span>(solvent_data[accepted][<span class="string">'angle'</span>])<span class="operator">/</span><span class="builtin">len</span>(solvent_data[accepted][<span class="string">'angle'</span>])
+    angle_stddev <span class="operator">=</span> stddev(solvent_data[accepted][<span class="string">'angle'</span>], average_angle)
+    output.write(<span class="string">"Distance:\t{0:.2f} +- "</span>.format(average_distance))
+    output.write(<span class="string">"{0:.2f}.\n"</span>.format(distance_stddev))
+    output.write(<span class="string">"Angle:  \t{0:.2f} +- "</span>.format(average_angle))
+    output.write(<span class="string">"{0:.2f}.\n\n"</span>.format(angle_stddev))
+
+
+
+output.close()
+<span class="builtin">exit</span>(0)
+</pre>
+
+</body>
+</html>
