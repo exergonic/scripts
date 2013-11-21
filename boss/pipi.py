@@ -46,6 +46,7 @@ solvent_atoms = ['C05', 'N04', 'N06']
 #
 # Author: Billy Wayne McCann
 # email : thebillywayne@gmail.com
+# license: It's Yours! (BSD-like)
 # NOTE:  My code is purposefully verbose. don't hate. 
 ###############################################################################
 
