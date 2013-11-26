@@ -118,8 +118,7 @@ mk_zopts()
         cp ${LOCALDIR}/*par .
         cp ${LOCALDIR}/*cmd .
 
-        # copy billy's go_xopt.sh script for full automation of the optimization to convergence
-            cp ${LOCALDIR}/go_xopt.sh .	
+        cp ${LOCALDIR}/go_xopt.sh .	
 
         #copy the temporary zmatrix file to the working directory and rename it.
         cp ${TEMPORARY_ZMAT} ./${NAME}.z 
@@ -194,24 +193,24 @@ exit 0
 # the actual variables are set below this function
 _2D_pmf()
 {
-	for CONST_VALUE in ${CONST_RANGE} ; do
-		DIRNAME="${CONST_PREFIX}_${CONST_VALUE}"
-		[ ! -d "$DIRNAME" ] && mkdir -v $DIRNAME 
-		cd $DIRNAME || exit 1
-		echo $DIRNAME
-		
-		cp -r ${TEMPLATE_DIR}/preopt_zmats .
-		cp ${TEMPLATE_DIR}/mk_1D_mutation_dirs.sh .
-		cd ./preopt_zmats || exit 3
-		YLINENUMBER="$( grep -n Y.YY *.z | cut -d: -f 1 )"
-		sed -i "${YLINENUMBER}s/Y.YY/${CONST_VALUE}/" *.z
-		./mk_zopts.sh x* *.z 
-		cd ..
-		./mk_1D_mutation_dirs.sh
-		rm ./mk_1D_mutation_dirs.sh
-		printf "\n\n"
-		cd ..
-	done
+    for CONST_VALUE in ${CONST_RANGE} ; do
+        DIRNAME="${CONST_PREFIX}_${CONST_VALUE}"
+        [ ! -d "$DIRNAME" ] && mkdir -v $DIRNAME 
+        cd $DIRNAME || exit 1
+        echo $DIRNAME
+        
+        cp -r ${TEMPLATE_DIR}/preopt_zmats .
+        cp ${TEMPLATE_DIR}/mk_1D_mutation_dirs.sh .
+        cd ./preopt_zmats || exit 3
+        YLINENUMBER="$( grep -n Y.YY *.z | cut -d: -f 1 )"
+        sed -i "${YLINENUMBER}s/Y.YY/${CONST_VALUE}/" *.z
+        ./mk_zopts.sh x* *.z 
+        cd ..
+        ./mk_1D_mutation_dirs.sh
+        rm ./mk_1D_mutation_dirs.sh
+        printf "\n\n"
+        cd ..
+    done
 }
 
 # function to flip the X and Y values when changing from

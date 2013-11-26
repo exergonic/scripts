@@ -157,7 +157,7 @@ for cation in pyr_cations:
                     submitcmd = glob('*csh')
                     subprocess.call(["/home/aubbwc/scripts/runboss", submitcmd[0]])
                     os.chdir(currentdir)
-                    
+
 
 stoptime = time()
 runtime = stoptime - starttime
