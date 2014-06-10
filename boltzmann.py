@@ -2,8 +2,8 @@
 
 # Calculation Boltzmann population of conformers
 
-from sys import exit, argv, log
-from math import exp
+from sys import exit, argv
+from math import exp, log
 
 if len(argv[1:]) == 0:
     print("Input the deltaG values as arguments to this script.")
@@ -29,6 +29,7 @@ def sum_exponentials(energies):
 
 # partition function
 distribution = sum_exponentials(delta_Gs)
+print("Q = {0:.2f}".format(distribution))
 
 # total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
 equilibrium_population_energy = RT * log(distribution)
