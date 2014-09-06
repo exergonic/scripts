@@ -1,0 +1,53 @@
+#!/bin/bash
+
+
+# exit on first error
+set -e
+
+#-------------------- variables ------------------------------------------
+
+unset file
+unset ters
+unset second_ter
+unset out
+unset pdbs
+
+readonly pdbs="$@"
+
+#-------------------  function  -----------------------------------------
+#
+# read pdb. extract only the solute. 
+# for now, there are two solutes. Hence the 
+# usage of $second_ter
+#
+extract_solute ()
+{
+	local file=$1
+	local out=./solutes/${file%.pdb}.solute.pdb
+
+	[[ ! -e ${file} ]] && "$file doesn't exist" && exit 1
+	[[ ! -d solutes ]] &&  mkdir solutes
+	[[ -e $out ]] && rm $out
+
+	local ters=( $(grep -n TER $file | cut -d: -f1))
+	local second_ter=$(( ${ters[1]} - 1))
+
+	head -n $second_ter $file > $out
+	printf "END\n" >> $out
+
+	printf "\tCreated $out\n"
+
+	return
+}
+# / extract_solute
+
+#-------------------  main   --------------------------------------------
+
+for pdb
+do
+	extract_solute $pdb
+done
+#
+#------------------------------------------------------------------------
+#
+exit 0
