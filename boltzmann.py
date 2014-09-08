@@ -1,9 +1,41 @@
 #!/usr/bin/env python3
 
-# Calculation Boltzmann population of conformers
 
-from sys import exit, argv, log
-from math import exp
+
+## ABOUT  ####################################################################
+#
+# Calculation Boltzmann population of conformers at 298K
+# Relative energies (kcal/mol) are given as arguments to the script.
+# 
+# Output:
+# The percent abundance associated with each relative free energy
+# is displayed on stdout.
+#
+## INVOCATION  ###############################################################
+# 
+# Example:
+# python3 ./boltzmann.py 0.00 0.05 1.00
+# or
+# ./boltzmann.py 0.00 0.05 1.00
+#
+# Output will be:
+
+#           0.00: 47.53%
+#           0.05: 43.69%
+#           1.00: 8.78%
+# 
+#           Total equilibrium population energy: 0.440356
+#
+## AUTHOR  ###################################################################
+#
+# Billy Wayne McCann
+# email : thebillywayne@gmail.com
+# license : ItsYours (BSD-like)
+#
+##############################################################################
+
+from sys import exit, argv
+from math import exp, log
 
 if len(argv[1:]) == 0:
     print("Input the deltaG values as arguments to this script.")
@@ -11,6 +43,7 @@ if len(argv[1:]) == 0:
 
 delta_Gs = [float(i) for i in argv[1:]]
 
+# gas constant times 298K
 RT = 0.5921
 
 
