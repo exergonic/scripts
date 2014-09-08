@@ -1,16 +1,29 @@
 #!/bin/bash
-
+#
 # Extracts thermodynamic values from BOSS out files.
 # Goes through every *sum file with a number in its name,
 # extracts the data, and places it into the the summary file.
+#
+
+# bail on any error
 set -e
+
 
 # summary file
 txt="0.thermovalues.txt"
+
+[[ -e "$txt" ]] && rm -v $txt
+
+# if an f5sum file exists, move it to f05sum 
+# so that it appears in the proper order in the $txt file
+# NOTE: This isn't appropriate for running very small windows.
+# [[ -e f5sum ]] && mv f5sum f05sum
+
 # list of BOSS output sum files
-sumfiles=$( find . -maxdepth 1 -mindepth 1 -name "*sum" | egrep [0-9] | sort)
+sumfiles=$( find . -maxdepth 1 -mindepth 1 -name "*?sum" | egrep [0-9] | sort)
 
 
+# function to acquire thermodynamics values from an individual out file
 get_thermo_values(){
     # place entire thermodynamic output into variable
     delta_values=$( awk '/ Run      Delta G/,/Title/' $sumfile)
@@ -32,9 +45,13 @@ get_thermo_values(){
     deltaS_averages[0]=$( echo "scale=4; ${deltaS_averages[0]}*-1" |bc)
 
     # print to output file
+		# 1st window
+    printf "$sumfile: " >> $txt
     printf "%.3f +- %.3f\t\t" ${deltaG_averages[0]} ${deltaG_std_devs[0]} >> $txt
     printf "%.3f +- %.3f\t\t" ${deltaH_averages[0]} ${deltaH_std_devs[0]} >> $txt
     printf "%.3f +- %.3f\n" ${deltaS_averages[0]} ${deltaS_std_devs[0]} >> $txt
+		# 2nd window
+		printf "$sumfile: " >> $txt
     printf "%.3f +- %.3f\t\t" ${deltaG_averages[1]} ${deltaG_std_devs[1]} >> $txt
     printf "%.3f +- %.3f\t\t" ${deltaH_averages[1]} ${deltaH_std_devs[1]} >> $txt
     printf "%.3f +- %.3f\n" ${deltaS_averages[1]} ${deltaS_std_devs[1]} >> $txt
@@ -52,7 +69,7 @@ get_thermo_values(){
 }
 
 # header
-printf "  ,Delta G           ,Delta H           ,Delta S\n" > $txt
+printf "\t\t\tDelta G\t\t\t\t\tDelta H\t\t\t\tDelta S\n" > $txt
 
 # loop through sumfiles and extract thermodynamic values
 for sumfile in $sumfiles ; do
@@ -101,11 +118,11 @@ for deltaS_std_dev in ${all_deltaS_std_devs[@]} ; do
 done
 Ssigma=$( echo "scale=3; sqrt($Ssigma_squared_sum)" | bc)
 
-
-
-
+# print totals and standard deviations to $txt file
 echo   "=======================TOTALS==========================" >> $txt
-printf "%.3f +- %.3f\t\t" ${deltaG_sum} ${Gsigma} >> $txt
+printf "\t%.3f +- %.3f\t\t" ${deltaG_sum} ${Gsigma} >> $txt
 printf "%.3f +- %.3f\t\t" ${deltaH_sum} ${Hsigma} >> $txt
 printf "%.3f +- %.3f\n" ${deltaS_sum} ${Ssigma} >> $txt
+
+exit 0
      

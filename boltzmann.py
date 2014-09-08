@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 ## ABOUT  ####################################################################
 #
 # Calculation Boltzmann population of conformers at 298K
@@ -62,6 +61,7 @@ def sum_exponentials(energies):
 
 # partition function
 distribution = sum_exponentials(delta_Gs)
+print("Q = {0:.2f}".format(distribution))
 
 # total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
 equilibrium_population_energy = RT * log(distribution)

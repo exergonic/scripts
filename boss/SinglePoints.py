@@ -66,7 +66,7 @@ for cation in cations:
                 files = filesToCopy(cation, anion)
                 [ shutil.copy(file, pathname) for file in files ]
                 [ print("\t\t%s copied." % file) for file in files ]
-                
+
                 # SET THE CORRECT PATHNAME FOR FILES IN THE NEW DIRECTORY
                 dummy   = os.path.join(pathname, files[0].split('/')[-1])
                 liqpar  = os.path.join(pathname, files[1].split('/')[-1])
@@ -74,7 +74,7 @@ for cation in cations:
                 cshfile = os.path.join(pathname, files[3].split('/')[-1])
                 datadir = os.path.join(homedir, cation, anion,
                                             cutoff, 'datafiles')
-                
+
                 # EDIT FILES ACCORDINGLY
                 # liqpar: set icutas array and cutoff 
                 # anions Cl, NO3, and TFO need - sign in the principal solvent

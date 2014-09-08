@@ -1,7 +1,0 @@
-#!/bin/bash
-
-PREFIX="CH"
-START="1.15"
-FINISH="1.25"
-INTERVAL="0.01"
-
