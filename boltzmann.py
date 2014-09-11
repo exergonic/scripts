@@ -62,13 +62,19 @@ def sum_exponentials(energies):
 # partition function
 distribution = sum_exponentials(delta_Gs)
 print("Q = {0:.2f}".format(distribution))
+print("S = {0:.2f}".format( RT * log(distribution)))
 
-# total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
-equilibrium_population_energy = RT * log(distribution)
+## TODO: this is sooo wrong
+## total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
+#equilibrium_population_energy = RT * log(distribution)
+#print("Total equilibrium population energy: %f"
+#      % equilibrium_population_energy)
 
+print("Relative Abundances")
 for delta_G in delta_Gs:
     percent_abundance = exponential(delta_G) / distribution * 100
-    print("%.2f: %.2f%%" % (delta_G, percent_abundance))
+    print("\t%.2f: %.2f%%" % (delta_G, percent_abundance))
 
-print("\nTotal equilibrium population energy: %f"
-      % equilibrium_population_energy)
+
+
+
