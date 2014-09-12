@@ -5,7 +5,7 @@
 #
 # P1 = exp(-B*deltaG) / sigma_i(exp(-B*deltaG_i)
 #
-# P1/P2 = exp( -B* [G1 - G2] )
+# deltaG = -RT * ln(population/maximum(population))
 #
 
 
@@ -28,6 +28,7 @@ if sum(pops) != 1.00:
 # the maximum population is what the others are compared to
 zero = max(pops)
 
+# present the highest populations first
 pops.sort(reverse=True)
 
 for pop in pops:
