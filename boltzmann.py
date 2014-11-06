@@ -1,6 +1,37 @@
 #!/usr/bin/env python3
 
-# Calculation Boltzmann population of conformers
+
+## ABOUT  ####################################################################
+#
+# Calculation Boltzmann population of conformers at 298K
+# Relative energies (kcal/mol) are given as arguments to the script.
+# 
+# Output:
+# The percent abundance associated with each relative free energy
+# is displayed on stdout.
+#
+## INVOCATION  ###############################################################
+# 
+# Example:
+# python3 ./boltzmann.py 0.00 0.05 1.00
+# or
+# ./boltzmann.py 0.00 0.05 1.00
+#
+# Output will be:
+
+#           0.00: 47.53%
+#           0.05: 43.69%
+#           1.00: 8.78%
+# 
+#           Total equilibrium population energy: 0.440356
+#
+## AUTHOR  ###################################################################
+#
+# Billy Wayne McCann
+# email : thebillywayne@gmail.com
+# license : ItsYours (BSD-like)
+#
+##############################################################################
 
 from sys import exit, argv
 from math import exp, log
@@ -11,6 +42,7 @@ if len(argv[1:]) == 0:
 
 delta_Gs = [float(i) for i in argv[1:]]
 
+# gas constant times 298K
 RT = 0.5921
 
 
@@ -30,13 +62,19 @@ def sum_exponentials(energies):
 # partition function
 distribution = sum_exponentials(delta_Gs)
 print("Q = {0:.2f}".format(distribution))
+print("S = {0:.2f}".format( RT * log(distribution)))
 
-# total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
-equilibrium_population_energy = RT * log(distribution)
+## TODO: this is sooo wrong
+## total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
+#equilibrium_population_energy = RT * log(distribution)
+#print("Total equilibrium population energy: %f"
+#      % equilibrium_population_energy)
 
+print("Relative Abundances")
 for delta_G in delta_Gs:
     percent_abundance = exponential(delta_G) / distribution * 100
-    print("%.2f: %.2f%%" % (delta_G, percent_abundance))
+    print("\t%.2f: %.2f%%" % (delta_G, percent_abundance))
 
-print("\nTotal equilibrium population energy: %f"
-      % equilibrium_population_energy)
+
+
+

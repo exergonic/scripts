@@ -117,7 +117,7 @@ fi
 # query user for time limit according to specified queue
 #-------------------------------------------------------------------
 
-if [ $num_cpus -eq "1" ]
+if [[ $num_cpus -eq 1 ]]
 then
   #  this uses num cpu * percpu time
   pcput_time=`$MOAB_BIN/qmgr -c "list queue $queue" | grep resources_max.pcput | cut -c23- | cut -f1 -d:`
@@ -268,7 +268,7 @@ userid=`whoami`
 	#
 
 #set_limits cpu_time num_nodes cpus_per_node memory license/NA file/NA
-if [ "$num_cpus" -eq "1" ]
+if [ $num_cpus -eq 1 ]
 then
   limits=`/apps/scripts/set_limits $time $num_cpus NA $memory NA NA`
 fi
@@ -285,7 +285,7 @@ fi
 #echo "limits = "$limits
 
 # error trap for too many shared memory processors
-if [ "$num_cpus" -eq "72" ] 
+if [ $num_cpus -eq 72 ] 
 then
   echo "ERROR: Shared memory jobs cannot use more than 72 CPUs"
   exit
