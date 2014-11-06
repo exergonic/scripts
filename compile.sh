@@ -38,8 +38,4 @@ else
 	printf "%s\n" "SumTingWong"
 fi
 
-read -p "Attempt to execute? (Y|N)   " response
-response=$( echo $response | tr [:upper:] [:lower:] )
-[[ "$response" == "y" ]] && ./$out
-
 exit 0
