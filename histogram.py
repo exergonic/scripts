@@ -1,25 +1,5 @@
 #!/usr/bin/env python3
 
-## ABOUT  ####################################################################
-#
-#
-#
-#
-#
-#
-## INVOCATION  ###############################################################
-#
-#
-#
-#
-#
-## AUTHOR  ###################################################################
-#
-# Billy Wayne McCann
-# email : thebillywayne@gmail.com
-# license : ItsYours (BSD-like)
-#
-##############################################################################
 
 import sys
 import math
@@ -43,11 +23,7 @@ def exponential(delta_G):
 
 def sum_exponentials(energies):
     """ Return the sum of the exponentials """
-    sum = 0
-    for energy in energies:
-        sum += exponential(energy)
-    return sum
-
+    return sum([exponential(energy) for energy in energies])
 
 
 # dictionary to hold angles, energy, and the calculated population
@@ -56,12 +32,11 @@ data = {}
 # read through input file and gather data
 
 with open(datafile, 'r') as fh:
-    contents = fh.read().split('\n')
-    contents.pop()
-    for entry in contents:
-        angle = float(entry.split()[0])
-        energy = float(entry.split()[1])
-        data[angle] = {'energy': energy}
+		contents = [line[:-1] for line in fh]
+		for entry in contents:
+				angle = float(entry.split()[0])
+				energy = float(entry.split()[1])
+				data[angle] = {'energy': energy}
 
 energies = [ data[i]['energy'] for i in data.keys() ]
 minimum = min(energies)
