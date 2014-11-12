@@ -41,7 +41,7 @@ do
 	# if not, it will be empty.
 	HAS_IM="$( grep "imaginary" $FILE )"
 	# if HAS_IM contains text, then the file has an IM, so set IM_STATUS=1.
-	[ -n "$HAS_IM" ] && IM_STATUS=1
+	[[ -n "$HAS_IM" ]] && IM_STATUS=1
 	# variable G will be the free energy.
 	G="$( grep "Sum of electronic and thermal Free Energies" $FILE | awk -F"=" '{ print $2 }'  )"
 	# output the filename, free energy, and IM_STATUS to the results file.

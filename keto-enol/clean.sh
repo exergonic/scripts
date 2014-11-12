@@ -1,23 +1,23 @@
 #!/bin/bash
 
-DIRS=$( find . -mindepth 1 -maxdepth 1 -type d | sort | grep ./C )
+dirs=$( find . -mindepth 1 -maxdepth 1 -type d | sort | grep ./c )
 
-for DIR in  $DIRS ; do 
-	cd $DIR
-	echo $DIR
+for dir in  $dirs ; do 
+	cd $dir
+	echo $dir
 
-	DIRS2=$( find . -mindepth 1 -maxdepth 1 -type d | grep ./N )
+	dirs2=$( find . -mindepth 1 -maxdepth 1 -type d | grep ./n )
 
-	for DIR2 in $DIRS2 ; do
-		cd $DIR2
+	for dir2 in $dirs2 ; do
+		cd $dir2
 		rm *.gz log *.csh.*
-		echo cleaned $DIR/$DIR2
+		echo cleaned $dir/$dir2
 		cd ..
 	done
 	cd ..
 done
 
-echo Done
+echo done
 
 exit 0
 

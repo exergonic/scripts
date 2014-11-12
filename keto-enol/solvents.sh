@@ -1,25 +1,25 @@
 #!/bin/bash
 
-LOCALDIR=${PWD}
-TEMPLATEDIR=${LOCALDIR}/template_dir
-SOLVENT_LIST="CH3CN-394 CCL4-396 CHCL3-396 MECL2-394"
+localdir=${PWD}
+templatedir=${localdir}/template_dir
+solvent_list="CH3CN-394 CCL4-396 CHCL3-396 MECL2-394"
 
-for SOLVENT_NUM in ${SOLVENT_LIST} ; do
-	SOLVENT=$( echo $SOLVENT_NUM | cut -d "-" -f "1" )
-	NUM=$( echo $SOLVENT_NUM | cut -d "-" -f "2" )
-	mkdir -p ${SOLVENT}/2D || exit 1
-       	cd ${SOLVENT}/2D || exit 2
-	cp -r ${TEMPLATEDIR} .
-	sed -i "9s/SOLVENT/${SOLVENT}/" ./template_dir/template.csh
-	sed -i "3s/XXXX/${SOLVENT}/" ./template_dir/pmfpar 
-	sed -i "19s/YYY/${NUM}/" ./template_dir/pmfpar
+for solvent_num in ${solvent_list} ; do
+	solvent=$( echo $solvent_num | cut -d "-" -f "1" )
+	num=$( echo $solvent_num | cut -d "-" -f "2" )
+	mkdir -p ${solvent}/2d || exit 1
+       	cd ${solvent}/2d || exit 2
+	cp -r ${templatedir} .
+	sed -i "9s/solvent/${solvent}/" ./template_dir/template.csh
+	sed -i "3s/xxxx/${solvent}/" ./template_dir/pmfpar 
+	sed -i "19s/yyy/${num}/" ./template_dir/pmfpar
 	
-	cp ${LOCALDIR}/deprot.sh .
-	./deprot.sh s > SUBMITTED
+	cp ${localdir}/deprot.sh .
+	./deprot.sh s > submitted
 
-	cd ${LOCALDIR}
+	cd ${localdir}
 done
 
-echo Yo dog.
+echo yo dog.
 
 exit 0

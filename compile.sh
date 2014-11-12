@@ -29,7 +29,6 @@ case ${src##*.} in
 		;;
 esac
 
-<<<<<<< HEAD
 if [[ $stat ]]
 then
 	read -p "Attempt to execute? (Y|N)   " response
@@ -38,10 +37,5 @@ then
 else
 	printf "%s\n" "SumTingWong"
 fi
-=======
-read -p "Attempt to execute? (Y|N)   " response
-response=$( echo $response | tr [:upper:] [:lower:] )
-[[ "$response" == "y" ]] && ./$out
 
 exit 0
->>>>>>> e9b121fcd7e32811eb9bc34275f4f03f237681d4

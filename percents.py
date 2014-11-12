@@ -33,13 +33,3 @@ pops.sort(reverse=True)
 
 for pop in pops:
     print("%.2f ==> %.2f kcal/mol" % (pop, -RT*log(pop/max(pops))))
-
-
-
-
-
-
-
-
-
-

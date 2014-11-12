@@ -1,15 +1,22 @@
 #!/bin/bash
 
-# runs semiempirical jobs in gaussian
+# sets up and runs semiempirical jobs in gaussian
+# billy wayne mccann
+# bsd 2-clause license
 
-METHODS="AM1 PDDG PM6"
+# sane bash behavior
+set -e
+set -u
+set -o pipefile
 
-for GJF in *.gjf
+methods="am1 pddg pm6"
+
+for gjf in *.gjf
 do
-	for METHOD in $METHODS
+	for method in $methods
 	do
-		cp $GJF ${GJF%.gjf}.${METHOD}.gjf
-		sed -i "s/METHOD/${METHOD}/g" ${GJF%.gjf}.${METHOD}.gjf
+		cp $gjf ${gjf%.gjf}.${method}.gjf
+		sed -i "s/METHOD/${method}/g" ${gjf%.gjf}.${method}.gjf
 	done
 done
 

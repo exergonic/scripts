@@ -4,13 +4,13 @@
 # then unzips all the images and places
 # the shell within the images directory
 
-DIRS=$( find . -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )
+dirs=$( find . -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )
 
-for DIR in $DIRS ; do
-	cd $DIR
-	SUBDIRS=$( find . -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )
-	for SUBDIR in $SUBDIRS ; do
-		cd $SUBDIR
+for dir in $dirs ; do
+	cd $dir
+	subdirs=$( find . -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )
+	for subdir in $subdirs ; do
+		cd $subdir
 
 		mkdir ./images || exit 1  ## make a new directory for the images.
 					  ## if a new directory cannot be made, exit the script.

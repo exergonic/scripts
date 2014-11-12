@@ -1,25 +1,5 @@
 #!/usr/bin/env python3
 
-## ABOUT  ####################################################################
-#
-#
-#
-#
-#
-#
-## INVOCATION  ###############################################################
-#
-#
-#
-#
-#
-## AUTHOR  ###################################################################
-#
-# Billy Wayne McCann
-# email : thebillywayne@gmail.com
-# license : ItsYours (BSD-like)
-#
-##############################################################################
 
 import sys
 import math
@@ -36,18 +16,13 @@ output = open('histodata.txt', 'w')
 # universal gas constant energy at 298K
 RT = 0.5921
 
-
 def exponential(delta_G):
     """ Return value of exp(-delta_G/RT). T = 298K """
     return math.exp(-delta_G/RT)
 
 def sum_exponentials(energies):
     """ Return the sum of the exponentials """
-    sum = 0
-    for energy in energies:
-        sum += exponential(energy)
-    return sum
-
+    return sum([exponential(energy) for energy in energies])
 
 
 # dictionary to hold angles, energy, and the calculated population
@@ -55,17 +30,15 @@ data = {}
 
 # read through input file and gather data
 
-with open(datafile, 'r') as fh:
-    contents = fh.read().split('\n')
-    contents.pop()
-    for entry in contents:
-        angle = float(entry.split()[0])
-        energy = float(entry.split()[1])
-        data[angle] = {'energy': energy}
+contents = [line[:-1] for line in open(datafile,'r')]
+for entry in contents:
+    angle = float(entry.split()[0])
+    energy = float(entry.split()[1])
+    data[angle] = {'energy': energy}
 
-energies = [ data[i]['energy'] for i in data.keys() ]
+energies = [data[i]['energy'] for i in data.keys()]
 minimum = min(energies)
-energies_zeroed = [ i - minimum for i in energies ]
+energies_zeroed = [i - minimum for i in energies]
 distribution = sum_exponentials(energies_zeroed)
 
 for angle in sorted(data.keys()):

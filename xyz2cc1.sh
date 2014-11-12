@@ -2,8 +2,10 @@
 
 # test for openbabel
 has_babel="$( which babel &> /dev/null )"
-if [[ $? -eq 1 ]] ; then
+if [[ $? -eq 1 ]] 
+then
     printf "%s\n" "Cannot find 'babel' in path"
+		exit 1
 fi
 
 in=${1:?"Please input xyz file"}

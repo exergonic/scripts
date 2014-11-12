@@ -1,27 +1,27 @@
 #!/bin/bash
 
-CURRENTDIR=${PWD}
+currentdir=${PWD}
+ch_parents="$( find ./equil/ -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )"
 
-CH_PARENTS="$( find ./equil/ -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )"
+for ch_parent in ${ch_parents} 
+do
+	ch_orig_val=${ch_parent##*ch_}
+	ch_down_val=$( echo "scale=2; ${ch_orig_val} - 0.05" | bc )
+	ch_up_val=$( echo "scale=2; ${ch_orig_val} + 0.05" | bc )
 
-for CH_PARENT in ${CH_PARENTS} ; do
-	CH_ORIG_VAL=${CH_PARENT##*CH_}
-	CH_DOWN_VAL=$( echo "scale=2; ${CH_ORIG_VAL} - 0.05" | bc )
-	CH_UP_VAL=$( echo "scale=2; ${CH_ORIG_VAL} + 0.05" | bc )
+	nh_parents=$( find ${ch_parent} -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )
 
-	NH_PARENTS=$( find ${CH_PARENT} -mindepth 1 -maxdepth 1 -type d | sort | grep [0-9] )
+	for nh_parent in ${nh_parents} ; do
+		nh_orig_val=${nh_parent##*nh_}
+		nh_down_val=$( echo "scale=2; ${nh_orig_val} - 0.05" | bc )
+		nh_up_val=$( echo "scale=2; ${nh_orig_val} + 0.05" | bc )
 
-	for NH_PARENT in ${NH_PARENTS} ; do
-		NH_ORIG_VAL=${NH_PARENT##*NH_}
-		NH_DOWN_VAL=$( echo "scale=2; ${NH_ORIG_VAL} - 0.05" | bc )
-		NH_UP_VAL=$( echo "scale=2; ${NH_ORIG_VAL} + 0.05" | bc )
-
-		for NEW_CH_DIR in ${CH_DOWN_VAL} ${CH_ORIG_VAL} ${CH_UP_VAL} ; do
-				mkdir CH_${NEW_CH_DIR}
-				cd CH_${NEW_CH_DIR}
-				for NEW_NH_DIR in ${CH_DOWN_VAL} ${CH_ORIG_VAL} ${CH_UP_VAL} ; do
-					mkdir NH_${NEW_NH_DIR}
-					cd NH_${NEW_NH_DIR}
+		for new_ch_dir in ${ch_down_val} ${ch_orig_val} ${ch_up_val} ; do
+				mkdir ch_${new_ch_dir}
+				cd ch_${new_ch_dir}
+				for new_nh_dir in ${ch_down_val} ${ch_orig_val} ${ch_up_val} ; do
+					mkdir nh_${new_nh_dir}
+					cd nh_${new_nh_dir}
 					# copy and edit file
 					cd ..
 				done
@@ -32,9 +32,3 @@ for CH_PARENT in ${CH_PARENTS} ; do
 done
 
 exit 0
-				
-
-
-
-
-

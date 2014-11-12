@@ -1,43 +1,43 @@
 #!/bin/bash
 
-LOCALDIR=$PWD
-TEMPLATE_DIR=${LOCALDIR}/template_dir
-ZMAT_DIR=~/research/Keto-Enol/Pyridine/preopt_zmats
+localdir=$PWD
+template_dir=${localdir}/template_dir
+zmat_dir=~/research/keto-enol/pyridine/preopt_zmats
 
 
 if [ "$1" = "submit" -o "$1" = "s" ] ; then
-	SUBMIT="q -i *.csh"
+	submit="q -i *.csh"
 else
-	SUBMIT="echo Not submitting."
+	submit="echo not submitting."
 fi
 
-make_CH-CONSTANT_dirs()
+make_ch-constant_dirs()
 {
-	CH_CONSTANT_LIST="$( seq -w 1.00 0.05 2.30 )"
-	NH_WINDOW_LIST="0.95-1.95 1.95-2.95"
+	ch_constant_list="$( seq -w 1.00 0.05 2.30 )"
+	nh_window_list="0.95-1.95 1.95-2.95"
 
-	for CH_CONSTANT in $CH_CONSTANT_LIST ; do
-		mkdir CH_${CH_CONSTANT} || exit 1
-		cd CH_${CH_CONSTANT} || exit 2
-		echo ${CH_CONSTANT}
+	for ch_constant in $ch_constant_list ; do
+		mkdir ch_${ch_constant} || exit 1
+		cd ch_${ch_constant} || exit 2
+		echo ${ch_constant}
 
-		for NH_WINDOW in ${NH_WINDOW_LIST} ; do
-			mkdir "NH_${NH_WINDOW}" || exit 3
-			cd "NH_${NH_WINDOW}" || exit 4
-			cp ${TEMPLATE_DIR}/* . 
-			mv template.csh win${NH_WINDOW}.csh
+		for nh_window in ${nh_window_list} ; do
+			mkdir "nh_${nh_window}" || exit 3
+			cd "nh_${nh_window}" || exit 4
+			cp ${template_dir}/* . 
+			mv template.csh win${nh_window}.csh
 
 			# a case switch to determine from which directory
 			# to get the 'sum' file. for use when using pre-
 			# optimized zmatrices.
-			case "${NH_WINDOW}" in
+			case "${nh_window}" in
 				"0.95-1.95")
-					cp ${ZMAT_DIR}/CH_${CH_CONSTANT}/NH_1.45/sum pmfzmat
+					cp ${zmat_dir}/ch_${ch_constant}/nh_1.45/sum pmfzmat
 					sed -i "12s/1.45/0.95/" pmfzmat
 					sed -i "35s/$/\n00110001  1.95/" pmfzmat
 					;;
 				"1.95-2.95")
-					cp ${ZMAT_DIR}/CH_${CH_CONSTANT}/NH_2.45/sum pmfzmat
+					cp ${zmat_dir}/ch_${ch_constant}/nh_2.45/sum pmfzmat
 					sed -i "12s/2.45/1.95/" pmfzmat
 					sed -i "35s/$/\n00110001  2.95/" pmfzmat
 					;;
@@ -47,21 +47,21 @@ make_CH-CONSTANT_dirs()
 			esac
 
 
-			## EDIT THE CSH FILE
-			sed -i "s/CONSTANT/CH_${CH_CONSTANT}/g" *.csh
-			sed -i "s/WINDOW/NH_${NH_WINDOW}/g" *.csh
-			sed -i "s:LOCALDIR:${PWD}:g" *.csh
+			## edit the csh file
+			sed -i "s/constant/ch_${ch_constant}/g" *.csh
+			sed -i "s/window/nh_${nh_window}/g" *.csh
+			sed -i "s:localdir:${pwd}:g" *.csh
 
-			## EDIT THE ZMAT FILE 
+			## edit the zmat file 
 			# used when not using pre-optmizied zmatrices.
 
-			#BEGIN_HN=$( echo ${NH_WINDOW} | cut -d "-" -f 1 )
-			#END_HN=$( echo ${NH_WINDOW} | cut -d "-" -f 2 )
-			#sed -i "s/X.XX/${CH_CONSTANT}/g" pmfzmat
-			#sed -i "s/Y.YY/${BEGIN_HN}/g" pmfzmat
-			#sed -i "s/Z.ZZ/${END_HN}/g" pmfzmat
+			#begin_hn=$( echo ${nh_window} | cut -d "-" -f 1 )
+			#end_hn=$( echo ${nh_window} | cut -d "-" -f 2 )
+			#sed -i "s/x.xx/${ch_constant}/g" pmfzmat
+			#sed -i "s/y.yy/${begin_hn}/g" pmfzmat
+			#sed -i "s/z.zz/${end_hn}/g" pmfzmat
 
-			${SUBMIT}
+			${submit}
 
 			cd ..
 
@@ -71,36 +71,36 @@ make_CH-CONSTANT_dirs()
 	done
 }
 
-make_CROSS_dir()
+make_cross_dir()
 {
-	NH_CONSTANT_LIST="0.95"
-	CH_WINDOW_LIST="0.95-1.95 1.95-2.95"
+	nh_constant_list="0.95"
+	ch_window_list="0.95-1.95 1.95-2.95"
 
-	mkdir CROSS || exit 4
-	cd CROSS || exit 5
-	echo CROSS
+	mkdir cross || exit 4
+	cd cross || exit 5
+	echo cross
 
-	for NH_CONSTANT in $NH_CONSTANT_LIST ; do
-		mkdir NH_${NH_CONSTANT} || exit 1
-		cd NH_${NH_CONSTANT} || exit 2
-		for CH_WINDOW in ${CH_WINDOW_LIST} ; do
-			mkdir "CH_${CH_WINDOW}" || exit 3
-			cd "CH_${CH_WINDOW}" || exit 4
-			cp ${TEMPLATE_DIR}/* . 
-			mv template.csh cross_win${CH_WINDOW}.csh
-			## EDIT THE CSH FILE
-			sed -i "s/CONSTANT/NH_${NH_CONSTANT}/g" *.csh
-			sed -i "s/WINDOW/CH_${CH_WINDOW}/g" *.csh
-			sed -i "s:LOCALDIR:${PWD}:g" *.csh
-			## EDIT THE ZMAT FILE
-			case "${CH_WINDOW}" in
+	for nh_constant in $nh_constant_list ; do
+		mkdir nh_${nh_constant} || exit 1
+		cd nh_${nh_constant} || exit 2
+		for ch_window in ${ch_window_list} ; do
+			mkdir "ch_${ch_window}" || exit 3
+			cd "ch_${ch_window}" || exit 4
+			cp ${template_dir}/* . 
+			mv template.csh cross_win${ch_window}.csh
+			## edit the csh file
+			sed -i "s/constant/nh_${nh_constant}/g" *.csh
+			sed -i "s/window/ch_${ch_window}/g" *.csh
+			sed -i "s:localdir:${pwd}:g" *.csh
+			## edit the zmat file
+			case "${ch_window}" in
 				"0.95-1.95")
-					cp ${ZMAT_DIR}/NH_${NH_CONSTANT}/CH_1.45/sum pmfzmat
+					cp ${zmat_dir}/nh_${nh_constant}/ch_1.45/sum pmfzmat
 					sed -i "10s/1.45/0.95/" pmfzmat
 					sed -i "35s/$/\n00090001  1.95/" pmfzmat
 					;;
 				"1.95-2.95")
-					cp ${ZMAT_DIR}/NH_${NH_CONSTANT}/CH_2.45/sum pmfzmat
+					cp ${zmat_dir}/nh_${nh_constant}/ch_2.45/sum pmfzmat
 					sed -i "10s/2.45/1.95/" pmfzmat
 					sed -i "35s/$/\n00090001  2.95/" pmfzmat
 					;;
@@ -110,14 +110,14 @@ make_CROSS_dir()
 			esac
 
 
-#			BEGIN_CH=$( echo ${CH_WINDOW} | cut -d "-" -f 1 )
-#			END_CH=$( echo ${CH_WINDOW} | cut -d "-" -f 2 )
-#			sed -i "10s/X.XX/${BEGIN_CH}/" pmfzmat
-#			sed -i "12s/Y.YY/${NH_CONSTANT}/" pmfzmat
+#			begin_ch=$( echo ${ch_window} | cut -d "-" -f 1 )
+#			end_ch=$( echo ${ch_window} | cut -d "-" -f 2 )
+#			sed -i "10s/x.xx/${begin_ch}/" pmfzmat
+#			sed -i "12s/y.yy/${nh_constant}/" pmfzmat
 #			sed -i "36s/0011/0009/" pmfzmat
-#			sed -i "36s/Z.ZZ/${END_CH}/" pmfzmat
+#			sed -i "36s/z.zz/${end_ch}/" pmfzmat
 
-			${SUBMIT}
+			${submit}
 
 			cd ..
 		done
@@ -127,8 +127,8 @@ make_CROSS_dir()
 
 
 
-make_CH-CONSTANT_dirs 
-make_CROSS_dir 
+make_ch-constant_dirs 
+make_cross_dir 
 
 
 exit 0

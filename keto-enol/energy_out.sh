@@ -2,19 +2,19 @@
 
 
 for window in -1.000 -0.750 -0.500 -0.250 0.000 0.250 0.500 0.750 1.000 ; do
-        cd win${window}
+	cd win${window}
 	printf "%s\n" "For window $window"
-        zcat d50sum.gz | grep 'DeltaG'
-        cd ../
+	zcat d50sum.gz | grep 'DeltaG'
+	cd ../
 done
 
 read -p "Want to now extract just the energies?(Y|N): " JUSTNRG
-JUSTNRG=$( echo $JUSTNRG | tr [:lower:] [:upper:] )  # make sure response is uppercase 
+justnrg=$( echo $justnrg | tr [:upper:] [:lower:] )  # make sure response is uppercase 
 
-if [ "$JUSTNRG" = "Y" ] ; then
+if [[ "$justnrg" = "y" ]] ; then
 	for window in -1.000 -0.750 -0.500 -0.250 0.000 0.250 0.500 0.750 1.000 ; do
-	        cd win${window}
-	        zcat d50sum.gz | grep 'DeltaG' | awk -F" " '{ print $7 }'
+		cd win${window}
+		zcat d50sum.gz | grep 'DeltaG' | awk -F" " '{ print $7 }'
 		cd ../
 	done
 fi

@@ -7,6 +7,8 @@
 
 # bail on any error
 set -e
+set -u
+set -o pipefail
 
 
 # summary file

@@ -23,14 +23,14 @@ fi
 # containing the windows, this next line won't produce
 # the right value. double check to make sure it
 # produces the NC bond length, e.g. 3.4, 3.45, etc.
-LOCALDIR=$PWD
-CONSTANT_LIST="$( seq -w 1.00 0.05 2.30 )"
-WINDOW_LIST="0.95-1.95 1.95-2.95"
+localdir=$PWD
+constant_list="$( seq -w 1.00 0.05 2.30 )"
+window_list="0.95-1.95 1.95-2.95"
 
-for CONSTANT in ${CONSTANT_LIST} ; do
-	cd CH_${CONSTANT} || exit 1
-	for WINDOW in ${WINDOW_LIST}; do
-		cd NH_${WINDOW} || exit 2
+for constant in ${constant_list} ; do
+	cd ch_${constant} || exit 1
+	for window in ${window_list}; do
+		cd nh_${window} || exit 2
 		case "$1" in
 			submit | s)
 				q -i win*.csh | tee -a ../jobs.txt
