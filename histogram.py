@@ -30,11 +30,12 @@ data = {}
 
 # read through input file and gather data
 
-contents = [line[:-1] for line in open(datafile,'r')]
-for entry in contents:
-    angle = float(entry.split()[0])
-    energy = float(entry.split()[1])
-    data[angle] = {'energy': energy}
+with open(datafile, 'r') as fh:
+		contents = [line[:-1] for line in fh]
+		for entry in contents:
+				angle = float(entry.split()[0])
+				energy = float(entry.split()[1])
+				data[angle] = {'energy': energy}
 
 energies = [data[i]['energy'] for i in data.keys()]
 minimum = min(energies)

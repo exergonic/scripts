@@ -48,7 +48,7 @@ RT = 0.5921
 
 def exponential(delta_G):
     """ 
-	Return value of exp(-delta_G/RT). T = 298K 
+    Return value of exp(-delta_G/RT). T = 298K 
     """
 
     return exp(-delta_G/RT)
@@ -56,10 +56,10 @@ def exponential(delta_G):
 
 def sum_exponentials(energies):
     """ 
-	Return the sum of the exponentials 
-    """
+    Return the sum of the exponentials 
+	"""
 
-    return sum([exponential(energy) for energy in energies])
+    return sum([ exponential(energy) for energy in energies])
 
 
 # partition function
