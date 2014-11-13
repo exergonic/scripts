@@ -32,6 +32,7 @@ linker_numbers = [final_order[i][21:26].strip() for i in range(len(final_order))
 # debug
 # print("Linker numbers found: %s" % linker_numbers)
 
+
 # read hdo file created by hostdesigner
 hdo_file = [line[:-1] for line in open('complex.hdo','r')]
 hdo_length = len(hdo_file)
@@ -55,13 +56,13 @@ hostguest = []
 hostguest_seen = []
 
 for linker_number in linker_numbers:
-    print("Investigating linker number:\t%s" % linker_number)
+    # print("Investigating linker number:\t%s" % linker_number)
     for n in range(len(linenumbers)-1):
         # Find the beginning and end of the next hostguest complex
         startline = linenumbers[n]
         endline = linenumbers[n+1]
         possible_hit = hdo_file[startline:endline]
-        print("Possible hit: %s" % linker_number)
+        # print("Possible hit: %s" % linker_number)
 
         # Determine if this hit has been found before to remove duplicates
         info_line = possible_hit[1]
@@ -69,16 +70,21 @@ for linker_number in linker_numbers:
         left_parens = info_line.find('(') + 1
         right_parens = info_line.find(')')
         complex_number = info_line[left_parens:right_parens].strip('_')
-        print("Complex number: \t%s" % complex_number)
+        # print("Complex number: \t%s" % complex_number)
 
         if complex_number == linker_number:
             if complex_number not in hostguest_seen:
-                print("\tMATCHED %s\n" % complex_number)
+                # print("\tMATCHED %s\n" % complex_number)
                 hostguest_seen.append(complex_number)
                 hostguest.append(possible_hit)
 
 
 file_prefix = 'out'
+
+
+sig_figs = len(linker_numbers[-1])
+fmt = str("%0" + str(sig_figs) + ".i")
+#DEBUG : print(fmt % 100) ; exit(0)
 
 with open('sorted_out.hdo','w') as out:
     for i, hg in enumerate(hostguest):
@@ -87,14 +93,28 @@ with open('sorted_out.hdo','w') as out:
         # in the separated_outputs/ dir.
         stripped_hostname = hg[1][36:73].replace(',', '').replace('_', '')
 
-        # ensure that i is two digits -> creates j
-        j = str("%02.f" % i)
-
         # create file name and write to it
-        file_suffix = str(j + '_' + stripped_hostname + '.dho')
+        padded_i = str(fmt % i)
+        file_suffix = str(padded_i + '_' + stripped_hostname + '.c3d')
         file_name = str(new_dir + '/' + file_prefix + file_suffix)
         write_file = open(file_name, 'w')
-        write_file.write('\n'.join(hg))
+        
+        out_c3d = []
+# DEBUG:        print(hg) 
+# DEBUG:        print('\n'.join(hg))
+        hg.pop(1)
+        out_c3d.append(str(hg[0]))
+        for j, line in enumerate(hg[1:], start=1):
+            a = line.split()
+            a.insert(1, str(j))
+            b = " ".join(a)
+            out_c3d.append(b)
+
+        write_file.write("\n".join(out_c3d)); exit(0)
+
+        # write_file.write('\n'.join(hg))
+
+
         
         # write all host-guest complexes to a single file
         [ out.write("%s\n" % a) for a in hg ]
