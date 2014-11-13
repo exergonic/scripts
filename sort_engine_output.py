@@ -18,17 +18,8 @@ out2 = 'complex.hdo'
 new_dir = 'separated_outputs'
 if os.path.exists(new_dir):
     shutil.rmtree(new_dir)
-else:
-    os.mkdir(new_dir)
 
-
-def return_interval(string, delim1, delim2):
-    '''
-    Return the range in a string that is delimited by delim1 and delim2
-    '''
-
-    return(string.find(delim1), string.find(delim2))
-
+os.mkdir(new_dir)
 
 # read lines from out.conf to get order of output
 final_order = [line[:-1] for line in open('out.conf','r')]
