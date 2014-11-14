@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 # requires regular expression searching
 import re
 from sys import exit
@@ -8,7 +7,6 @@ import os
 import shutil
 
 # ~~~~~~~~~~ F U N C T I O N S ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 def strip_special(string) -> str:
     'Removes certain characters from a string'
@@ -34,7 +32,7 @@ def make_c3d(hdo_in) -> list:
         a.insert(1, str(j))
         c3d_out.append(' '.join(a))
 
-    return(c3d_out)
+    return c3d_out 
 
 # input files created by HostDesigner
 outconf = 'out.conf'
@@ -78,6 +76,7 @@ linenumbers.append(hdo_length)
 
 # extract complexes from the hostdesigner output file
 hostguest = []
+# filter those that have already been seen
 hostguest_seen = []
 
 for linker_number in linker_numbers:

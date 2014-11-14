@@ -2,6 +2,7 @@
 
 # exit script on first error
 set -e
+set -u
 
 # ----- ABOUT ---- 
 # extracts supporting information from Gaussian output files.
@@ -37,76 +38,81 @@ set -e
 # LICENSE:  It's yours.
 #------------------
 
-
 # output file
 outfile=supporting_info.txt
 [[ -f $outfile ]] && rm $outfile
 
+# string that marks the beginning of the Gaussian condensed 
+# supplimental information
+delimiter='ASN'  # <--- specific to Alabama Supercomputer
+
 # make the logfiles all of the .log files in the current dir
 logfiles=($(find . -maxdepth 1 -name "*.log"))
 
-# TESTS ######################################################################
+# ~~~~~~~~~~~~ T E S T S ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # make sure there are log files
 if [[ ${#logfiles[@]} -eq 0 ]] ; then
-    echo "No log files in this directory."
-    echo "Exiting."
-    exit 0
+	echo "No log files in this directory."
+	echo "Exiting."
+	exit 0
 fi
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TS=false
 COMP=false
 
 # test if the calculations were TS or composite calculations
 # as directed by the options given by the user
-if [[ $# -gt 0 ]] ; then
-    options="$@"
-    options="$(echo $options | tr [:lower:] [:upper:])"
-    for option in $options ; do
-        [[ $option = 'TS' ]] && TS=true 
-        [[ $option = 'COMP' ]] && COMP=true
-    done
+if [[ $# -gt 0 ]]
+then
+	options="$@"
+	options="$(echo $options | tr [:lower:] [:upper:])"
+	for option in $options 
+	do
+		[[ $option = 'TS' ]] && TS=true
+		[[ $option = 'COMP' ]] && COMP=true
+	done
 fi
 
-
-
-# FUNCTIONS ################################################################## 
+# ~~~~~~~~~~~~~~ F U N C T I O N S ~~~~~~~~~~~~~~~~~~~~~~~
 
 # for composite thermochemical calculations
 _comp(){
-    # paste everything from 'Temperature =' to 'Free Energy' into the outfile.
-    awk '/Temperature=/,/Free\ Energy/' $logfile >> $outfile
-    echo "" >> $outfile
+	# paste everything from 'Temperature =' to 'Free Energy' into the outfile.
+	awk '/Temperature=/,/Free\ Energy/' $logfile >> $outfile
+	echo "" >> $outfile
 
-    # many condensed si info's are printed for composite
-    # jobs. find the last one.
-    begin_array=($(grep -n "ASN" $logfile | cut -d: -f1))
-    final_element=$(( ${#begin_array[@]} - 1 ))
-    begin=${begin_array[$final_element]}
-    end=$(grep -n "FreqCoord" $logfile | cut -d: -f1)
+	# many condensed si info's are printed for composite
+	# jobs. find the last one.
+	demarcating_lines=($(grep -n $delimiter $logfile | cut -d: -f1))
+	final_element=$(( ${#demarcating_lines[@]} - 1 ))
+	final_begin=${demarcating_lines[$final_element]}
+	final_end=$(grep -n "FreqCoord" $logfile | cut -d: -f1)
 
-    sed -n "${begin},${end}p" $logfile >> $outfile
-    echo "" >> $outfile
+	sed -n "${begin},${end}p" $logfile >> $outfile
+	echo "" >> $outfile
 }
 
 # extracts first row of vibrational data for TS calculations
 _vibs(){
-    grep -m 1 -B2 -A3 "Frequencies" $logfile >> $outfile
-    echo "" >> $outfile
+	grep -m 1 -B2 -A3 "Frequencies" $logfile >> $outfile
+	echo "" >> $outfile
 }
 
 # extract thermodynamic data
 _thermo(){
-    grep "Sum of electronic" $logfile >> $outfile
-    echo "" >> $outfile
+	grep "Sum of electronic" $logfile >> $outfile
+	echo "" >> $outfile
 }
 
 # extract condensed summary
 _si(){
-    begin="$(grep -m 1 -n "ASN" $logfile | cut -d: -f1)"
-    end="$(grep -m 1 -n "\\@" $logfile | cut -d: -f1)"
-    sed -n "${begin},${end}p" $logfile >> $outfile
-    echo "" >> $outfile
+	begin="$(grep -m 1 -n $delimiter $logfile | cut -d: -f1)"
+	end="$(grep -m 1 -n "\\@" $logfile | cut -d: -f1)"
+	sed -n "${begin},${end}p" $logfile >> $outfile
+	echo "" >> $outfile
 }
 
 
@@ -114,25 +120,29 @@ _si(){
 
 echo -e "$PWD\n" >> $outfile
 # loop through the logfiles and extract information
-for logfile in ${logfiles[@]} ; do
-    echo -e "$logfile\n" >> $outfile
+for logfile in ${logfiles[@]}
+do
+	echo -e "$logfile\n" >> $outfile
 
-    if $COMP ; then     # a composite calc
-        if $TS ; then   # a composite, TS calc
-            _vibs
-        fi
-        _comp
-    elif $TS ; then     # a TS calc
-        _vibs
-        _thermo 
-        _si
-    else                # normal ground state calc
-        _thermo
-        _si
-    fi
+	if $COMP 
+	then     						# a composite calc
+		if $TS
+		then     					# a composite, TS calc
+			_vibs
+		fi
+		_comp
+	elif $TS
+	then     						# a TS calc
+		_vibs
+		_thermo 
+		_si
+	else                # normal ground state calc
+		_thermo
+		_si
+	fi
 done
-
 
 # all done!
 printf "Script $0 complete.\n"
 exit 0
+
