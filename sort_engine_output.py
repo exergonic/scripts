@@ -7,9 +7,8 @@ from sys import exit
 import os
 import shutil
 
+# ~~~~~~~~~~ F U N C T I O N S ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-#~~~~~~~~~~ F U N C T I O N S ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def strip_special(string) -> str:
     'Removes certain characters from a string'
@@ -21,7 +20,7 @@ def strip_special(string) -> str:
 
     return a
 
-    
+
 def make_c3d(hdo_in) -> list:
     'Translate a hostdesigner output portion into a chem3d format'
 
@@ -50,18 +49,19 @@ if os.path.exists(new_dir):
 os.mkdir(new_dir)
 
 # read lines from out.conf to get order of output
-final_order = [line[:-1] for line in open(outconf,'r')]
+final_order = [line[:-1] for line in open(outconf, 'r')]
 
 # chop off first three lines and the last line
 final_order = final_order[3:-1]
 
 # get linker numbers
-linker_numbers = [final_order[i][21:26].strip() for i in range(len(final_order))]
+linker_numbers = [final_order[i][21:26].strip() for i
+                  in range(len(final_order))]
 # debug
 # print("Linker numbers found: %s" % linker_numbers)
 
 # read hdo file created by hostdesigner
-hdo_file = [line[:-1] for line in open(complexhdo,'r')]
+hdo_file = [line[:-1] for line in open(complexhdo, 'r')]
 hdo_length = len(hdo_file)
 
 # a regex to search for lines that define new complexes in hdo_file
@@ -110,23 +110,19 @@ file_prefix = 'out'
 sig_figs = len(linker_numbers[-1])
 fmt = str("%0" + str(sig_figs) + ".i")
 
-with open('sorted_out.hdo','w') as out:
+with open('sorted_out.hdo', 'w') as out:
     for i, hg in enumerate(hostguest):
-        
         # write each host-guest complex to a separate file
         # in the separated_outputs/ dir.
-        stripped_hostname = strip_special(hg[1][36:73]) 
+        stripped_hostname = strip_special(hg[1][36:73])
         # create file name and write to it
         padded_i = str(fmt % i)
         file_suffix = str(padded_i + '_' + stripped_hostname + '.c3d')
         file_name = str(new_dir + '/' + file_prefix + file_suffix)
         c3d_file = open(file_name, 'w')
-        
         c3d_content = make_c3d(hg)
-
         c3d_file.write("\n".join(c3d_content))
-        
         # write all host-guest complexes to a single file
-        [ out.write("%s\n" % a) for a in hg ]
+        [out.write("%s\n" % a) for a in hg]
 
 exit(0)
