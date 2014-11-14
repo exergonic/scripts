@@ -9,11 +9,15 @@ import shutil
 
 
 
-def strip_special(string, chars) -> str:
+#~~~~~~~~~~ F U N C T I O N S ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def strip_special(string) -> str:
     'Removes certain characters from a string'
 
-    for char in chars:
-        a = string.replace(char,'')
+    a = string.replace(',', '')
+    a = string.replace('[', '')
+    a = string.replace(']', '')
+    a = string.replace('_', '')
 
     return a
 
@@ -21,6 +25,7 @@ def strip_special(string, chars) -> str:
 def make_c3d(hdo_in) -> list:
     'Translate a hostdesigner output portion into a chem3d format'
 
+    hdo_in.pop(1)
     c3d_out = []
     c3d_out.append(hdo_in[0])
 
@@ -32,12 +37,9 @@ def make_c3d(hdo_in) -> list:
 
     return(c3d_out)
 
-
-
-
-# output file
-out1 = 'out.conf'
-out2 = 'complex.hdo'
+# input files created by HostDesigner
+outconf = 'out.conf'
+complexhdo = 'complex.hdo'
 
 # create separate output directory in which to put
 # separated hostguest complexes
@@ -48,7 +50,7 @@ if os.path.exists(new_dir):
 os.mkdir(new_dir)
 
 # read lines from out.conf to get order of output
-final_order = [line[:-1] for line in open('out.conf','r')]
+final_order = [line[:-1] for line in open(outconf,'r')]
 
 # chop off first three lines and the last line
 final_order = final_order[3:-1]
@@ -58,9 +60,8 @@ linker_numbers = [final_order[i][21:26].strip() for i in range(len(final_order))
 # debug
 # print("Linker numbers found: %s" % linker_numbers)
 
-
 # read hdo file created by hostdesigner
-hdo_file = [line[:-1] for line in open('complex.hdo','r')]
+hdo_file = [line[:-1] for line in open(complexhdo,'r')]
 hdo_length = len(hdo_file)
 
 # a regex to search for lines that define new complexes in hdo_file
@@ -73,7 +74,6 @@ for linenumber, entry in enumerate(hdo_file):
         linenumbers.append(linenumber)
 
 linenumbers.append(hdo_length)
-
 # DEBUG     print("\nLinenumbers which begin new complexes: %s" % linenumbers)
 
 # extract complexes from the hostdesigner output file
@@ -103,9 +103,7 @@ for linker_number in linker_numbers:
                 hostguest_seen.append(complex_number)
                 hostguest.append(possible_hit)
 
-
 file_prefix = 'out'
-
 
 # number of digits in final element of linker_numbers
 # pad other digits with 0's
@@ -117,7 +115,7 @@ with open('sorted_out.hdo','w') as out:
         
         # write each host-guest complex to a separate file
         # in the separated_outputs/ dir.
-        stripped_hostname = strip_special(hg[1][36:73], [',','[', ']', '_'])
+        stripped_hostname = strip_special(hg[1][36:73]) 
         # create file name and write to it
         padded_i = str(fmt % i)
         file_suffix = str(padded_i + '_' + stripped_hostname + '.c3d')
