@@ -55,8 +55,6 @@ final_order = final_order[3:-1]
 # get linker numbers
 linker_numbers = [final_order[i][21:26].strip() for i
                   in range(len(final_order))]
-# debug
-# print("Linker numbers found: %s" % linker_numbers)
 
 # read hdo file created by hostdesigner
 hdo_file = [line[:-1] for line in open(complexhdo, 'r')]
@@ -74,6 +72,7 @@ for linenumber, entry in enumerate(hdo_file):
 linenumbers.append(hdo_length)
 # DEBUG     print("\nLinenumbers which begin new complexes: %s" % linenumbers)
 
+print("Reordering complexes according to out.conf")
 # extract complexes from the hostdesigner output file
 hostguest = []
 # filter those that have already been seen
@@ -102,6 +101,7 @@ for linker_number in linker_numbers:
                 hostguest_seen.append(complex_number)
                 hostguest.append(possible_hit)
 
+print("Creating sorted_hdo file and creating chem3d files.")
 file_prefix = 'out'
 
 # number of digits in final element of linker_numbers
@@ -111,6 +111,8 @@ fmt = str("%0" + str(sig_figs) + ".i")
 
 with open('sorted_out.hdo', 'w') as out:
     for i, hg in enumerate(hostguest):
+        # write all host-guest complexes to a single file
+        [out.write("%s\n" % a) for a in hg]
         # write each host-guest complex to a separate file
         # in the separated_outputs/ dir.
         stripped_hostname = strip_special(hg[1][36:73])
@@ -121,7 +123,6 @@ with open('sorted_out.hdo', 'w') as out:
         c3d_file = open(file_name, 'w')
         c3d_content = make_c3d(hg)
         c3d_file.write("\n".join(c3d_content))
-        # write all host-guest complexes to a single file
-        [out.write("%s\n" % a) for a in hg]
 
+print("Complete")
 exit(0)
