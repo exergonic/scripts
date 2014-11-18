@@ -1,24 +1,25 @@
 #!/bin/bash
 
-# exit script on first error
+# sane bash behavior
 set -e
 set -u
+set -o pipefail
 
-# ----- ABOUT ---- 
+# ----- ABOUT ----
 # extracts supporting information from Gaussian output files.
 # gathers first row of frequency info for transition structures, thermochemical
 # data for transition strutures, and the condensed summary at the end of the
 # Gaussian output.  This is done by looking for 'ASN' (unique to the Alabama
 # Supercomputing Authority ) and then the '\@' which ends the summary, except
 # in the case of composite, thermochemical calculations, in which case it will
-# look for 'FreqCoords'. 
+# look for 'FreqCoords'.
 #
 # This script will create a UNIX text document. For easier importing into
 # Microsoft Word, run unix2dos on the outfile.
 #
-# ---- INVOCATION -- 
+# ---- INVOCATION --
 # The script can take two arguments: 'ts' and 'comp'
-# 
+#
 # 'ts' signifies that you need the usual thermochemical and condensed supp
 # info, as well as the first row of frequencies displaying the one negative
 # frequency.
@@ -27,22 +28,22 @@ set -u
 #
 # these two can be used in conjunction.
 #
-# examples: 
+# examples:
 # ./suppinfo.sh           <-- for a normal opt + freq job
-# ./suppinfo.sh ts        <-- for a ts job 
-# ./suppinfo.sh comp      <-- for a comp job 
-# ./suppinfo.sh comp ts   <-- for a comp, ts job 
+# ./suppinfo.sh ts        <-- for a ts job
+# ./suppinfo.sh comp      <-- for a comp job
+# ./suppinfo.sh comp ts   <-- for a comp, ts job
 #
-# AUTHOR: Billy Wayne McCann
-# EMAIL:  thebillywayne@gmail.com
-# LICENSE:  It's yours.
+# AUTHOR: 	Billy Wayne McCann
+# CONTACT:  thebillywayne@gmail.com
+# LICENSE:  BSD 2-Clause
 #------------------
 
 # output file
 outfile=supporting_info.txt
 [[ -f $outfile ]] && rm $outfile
 
-# string that marks the beginning of the Gaussian condensed 
+# string that marks the beginning of the Gaussian condensed
 # supplimental information
 delimiter='ASN'  # <--- specific to Alabama Supercomputer
 
@@ -69,7 +70,7 @@ if [[ $# -gt 0 ]]
 then
 	options="$@"
 	options="$(echo $options | tr [:lower:] [:upper:])"
-	for option in $options 
+	for option in $options
 	do
 		[[ $option = 'TS' ]] && TS=true
 		[[ $option = 'COMP' ]] && COMP=true
@@ -91,7 +92,7 @@ _comp(){
 	final_begin=${demarcating_lines[$final_element]}
 	final_end=$(grep -n "FreqCoord" $logfile | cut -d: -f1)
 
-	sed -n "${begin},${end}p" $logfile >> $outfile
+	sed -n "${final_begin},${final_end}p" $logfile >> $outfile
 	echo "" >> $outfile
 }
 
@@ -116,32 +117,38 @@ _si(){
 }
 
 
-# MAIN ########################################################################
+# ~~~~~~~ M A I N ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+_main()
+{
 echo -e "$PWD\n" >> $outfile
 # loop through the logfiles and extract information
 for logfile in ${logfiles[@]}
 do
 	echo -e "$logfile\n" >> $outfile
 
-	if $COMP 
-	then     						# a composite calc
+	if $COMP
+	then								# a composite calc
 		if $TS
-		then     					# a composite, TS calc
+		then							# a composite, TS calc
 			_vibs
 		fi
 		_comp
 	elif $TS
-	then     						# a TS calc
+	then								# a TS calc
 		_vibs
-		_thermo 
+		_thermo
 		_si
 	else                # normal ground state calc
 		_thermo
 		_si
 	fi
 done
+}
 
+_main
+
+# ~~~ E X I T ~~~~~~~~~~~~~~~~~~
 # all done!
 printf "Script $0 complete.\n"
 exit 0
