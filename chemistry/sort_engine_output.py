@@ -6,16 +6,17 @@ from sys import exit
 import os
 import shutil
 
+
 # ~~~~~~~~~~ F U N C T I O N S ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def strip_special(string) -> str:
+def strip_special(r) -> str:
     'Removes certain characters from a string'
 
-    a = string.replace(',', '')
-    a = string.replace('[', '')
-    a = string.replace(']', '')
-    a = string.replace('_', '')
+    a = r.replace(',', '')
+    a = r.replace('[', '')
+    a = r.replace(']', '')
+    a = r.replace('_', '')
 
     return a
 
@@ -34,6 +35,15 @@ def make_c3d(hdo_in) -> list:
         c3d_out.append(' '.join(a))
 
     return c3d_out
+
+def create_final_order(oconf) -> list:
+    needed_lines = oconf[3:-1]
+    lines_minus_uncoverged = [line for i, line in enumerate(needed_lines) if
+                              line[73:80] != '-999.99']
+
+    return(lines_minus_uncoverged)
+
+
 
 # input files created by HostDesigner
 outconf = 'out.conf'
@@ -110,7 +120,7 @@ file_prefix = 'out'
 
 # number of digits in final element of linker_numbers
 # pad other digits with 0's
-sig_figs = len(linker_numbers[-1])
+sig_figs = 4
 fmt = str("%0" + str(sig_figs) + ".i")
 
 with open('sorted_out.hdo', 'w') as out:
@@ -120,7 +130,7 @@ with open('sorted_out.hdo', 'w') as out:
         # write each host-guest complex to a separate file
         # in chem3d format in the separated_outputs/ dir.
         stripped_hostname = strip_special(hg[1][36:73])
-        # create file name and write to it
+        # ereate file name and write to it
         padded_i = str(fmt % i)
         file_suffix = str(padded_i + '_' + stripped_hostname + '.c3d')
         file_name = str(new_dir + '/' + file_prefix + file_suffix)
@@ -131,3 +141,4 @@ with open('sorted_out.hdo', 'w') as out:
 
 print("Complete")
 exit(0)
+

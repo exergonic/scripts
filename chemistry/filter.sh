@@ -28,7 +28,7 @@ readonly args="$@"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 file_string=${args}
-files=($( ls *_${file_string}.c3d))
+files=($( ls *_${file_string}*))
 filter_dir="filtered_out/"
 
 [[ -d $filter_dir ]] || mkdir $filter_dir
