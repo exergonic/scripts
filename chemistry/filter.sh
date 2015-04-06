@@ -33,14 +33,12 @@ filter_dir="filtered_out/"
 
 [[ -d $filter_dir ]] || mkdir $filter_dir
 
-_filter ()
-{
+_filter () {
 	local f="${@%_*}"
 	mv "${f}"* $filter_dir &> /dev/null
 }
 
-main()
-{
+main() {
 	for ((i=1; i < ${#files[@]} ; i++ ))
 	do
 		local n=${files[$i]}

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-### ABOUT ####################################################################
+
+from math import pow, degrees, sqrt, acos
+from sys import argv, exit
+from sysconfig import get_python_version
+
+#   ABOUT ####################################################################
 #
 # REQUIRES PYTHON 3.2!!!
 
@@ -22,7 +27,7 @@ atom_numbers = ['2', '6', '14']
 # file, 'angles.txt.' For many pdb files, use the shell's built-in file
 # globbing. The script will handle the file names appropriately.
 #
-### MODUS OPERANDI ###########################################################
+# # MODUS OPERANDI ###########################################################
 #
 # --The Molecular Plane--
 # The angle between the molecular plane and YZ plane is the arc-cosine of the
@@ -41,9 +46,9 @@ atom_numbers = ['2', '6', '14']
 # Having the unit vectors normal to the two planes, the angle between them is
 # the arc-cosine of the dot-product between the two vectors.
 #
-### INVOCATION ################################################################
+# # INVOCATION ################################################################
 #
-# Call the script giving the pdb file(s) as argument(s). 
+# Call the script giving the pdb file(s) as argument(s).
 #
 ###############################################################################
 #
@@ -52,11 +57,6 @@ atom_numbers = ['2', '6', '14']
 # License: DoWhatEverTheHellYouWantToWithIt (BSD-like)
 #
 ###############################################################################
-
-
-from math import pow, degrees, sqrt, acos
-from sys import argv, exit
-from sysconfig import get_python_version
 
 # make sure we're using at least version 3.2 of Python
 if float(get_python_version()) < 3.2:
@@ -82,57 +82,60 @@ z_normal = [1, 0, 0]
 
 # begin function definitions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
 def vectorize(coordinate1, coordinate2):
     '''Take coordinates and return a vector'''
 
     # extract x, y, z values from coordinates
     # make them floats for the subtraction operations in the return statement
-    x1 = float(coordinate1[0])
-    x2 = float(coordinate2[0])
-    y1 = float(coordinate1[1])
-    y2 = float(coordinate2[1])
-    z1 = float(coordinate1[2])
-    z2 = float(coordinate2[2])
-    return [x2-x1, y2-y1, z2-z1]
+
+    x1, y1, z1 = map(float, coordinate1)
+    x2, y2, z2 = map(float, coordinate2)
+
+    return [x2 - x1, y2 - y1, z2 - z1]
+
 
 def dotproduct(vector1, vector2):
     '''Return the dot product between two vectors'''
 
-    return vector1[0]*vector2[0]+vector1[1]*vector2[1]+vector1[2]*vector2[2]
+    return vector1[0] * vector2[0] + vector1[1] * vector2[1] + vector1[2] * vector2[2]
+
 
 def crossproduct(vector1, vector2):
     '''Find the cross product between two vectors'''
 
-    return [vector1[1]*vector2[2]-vector1[2]*vector2[1],
-            vector1[2]*vector2[0]-vector1[0]*vector2[2],
-            vector1[0]*vector2[1]-vector1[1]*vector2[0]]
+    return [vector1[1] * vector2[2] - vector1[2] * vector2[1],
+            vector1[2] * vector2[0] - vector1[0] * vector2[2],
+            vector1[0] * vector2[1] - vector1[1] * vector2[0]]
+
 
 def magnitude(vector):
     '''Return the magnitude of a vector'''
 
-    return sqrt(vector[0]*vector[0]+vector[1]*vector[1]+
-            vector[2]*vector[2])
+    return sqrt(vector[0] * vector[0] + vector[1] * vector[1] +
+                vector[2] * vector[2])
+
 
 def unitvector(vector):
     '''Return the unit vector of a vector'''
 
     mag = magnitude(vector)
-    unit_vector = []
-    for scalar in vector:
-        unit_vector.append(scalar/mag)
+    unit_vector = [i / mag for i in vector]
+
     return unit_vector
+
 
 def stddev(all_angles, average):
     '''Find the standard deviation of the angles'''
 
     # create a new list which is the difference between the average of the
     # angles and each individual angle.
-    square_diff_from_average = [pow((i-average), 2) for i in all_angles]
+    square_diff_from_average = [(i - average)**2 for i in all_angles]
 
     # the standard deviation is square root of the sum of the differences
     # between each each angle and the average squared divided by the number of
     # values in the list.
-    return sqrt(sum(square_diff_from_average)/len(square_diff_from_average))
+    return sqrt(sum(square_diff_from_average) / len(square_diff_from_average))
 
 
 def get_solute(filehandler):
@@ -149,6 +152,7 @@ def get_solute(filehandler):
                 break
             lines.append(line)
     return lines
+
 
 def get_coordinates(pdbfile):
     '''Get the coordinates for chosen atoms from the pdb file.'''
@@ -173,6 +177,7 @@ def get_coordinates(pdbfile):
                 coordinates.append(line_elements[5:8])
     return coordinates
 
+
 def calculate_angle(filename):
     ''' Calculate the angle between the molecular plane and the YZ plane.'''
 
@@ -189,7 +194,7 @@ def calculate_angle(filename):
 
     # the angle between the plane of the atomic coordinates and
     # the YZ plane is the arccosine of dot product of the two normals.
-    return  degrees(acos(dotproduct(molecule_normal, z_normal)))
+    return degrees(acos(dotproduct(molecule_normal, z_normal)))
 
 # end function definitions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -216,18 +221,16 @@ if len(pdb_files) > 1:
         angles.append(angle)
         sumfile.write("%s\t\t%.2f degrees.\n" % (pdb_file, angle))
 
-    
-    angle_average = sum(angles)/len(angles)
+    angle_average = sum(angles) / len(angles)
     standard_deviation = stddev(angles, angle_average)
 
     # write average to angles.txt and also print it to screen.
     sumfile.write('\nAverage angle is %.2f+-%.2f degrees.\n' %
-            (angle_average, standard_deviation))
+                  (angle_average, standard_deviation))
     sumfile.close()
 
-    
     print('\nAverage angle is \033[94;1m%.2f+-%.2f\033[0m degrees.\n' %
-            (angle_average, standard_deviation))
+          (angle_average, standard_deviation))
 
 else:
     # Only one pdb was specified. Print the angle to the screen.

@@ -2,7 +2,6 @@
 
 set -e # exit on first error
 set -u # error on unset
-set -x
 
 for i in *c3d
 do

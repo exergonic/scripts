@@ -15,7 +15,7 @@ if len(argv[1:]) == 0:
 RT = 0.5924
 
 # make all of the populations floats
-pops = [float(i) for i in argv[1:]]
+pops = map(float, argv[1:])
 
 # the populations are percentages. they should sum to 1.00
 if sum(pops) != 1.00:

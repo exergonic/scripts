@@ -6,13 +6,13 @@ ABOUT
 
  Calculation Boltzmann population of conformers at 298K
  Relative energies (kcal/mol) are given as arguments to the script.
- 
+
  Output:
  The percent abundance associated with each relative free energy
  is displayed on stdout.
 
 INVOCATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 
+
  Example:
  python3 ./boltzmann.py 0.00 0.05 1.00
  or
@@ -23,7 +23,7 @@ INVOCATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
            0.00: 47.53%
            0.05: 43.69%
            1.00: 8.78%
- 
+
            Total equilibrium population energy: 0.440356
 
 AUTHOR ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,24 +47,24 @@ delta_Gs = [float(i) for i in argv[1:]]
 RT = 0.5921
 
 def exponential(delta_G):
-    """ 
-    Return value of exp(-delta_G/RT). T = 298K 
+    """
+    Return value of exp(-delta_G/RT). T = 298K
     """
 
     return exp(-delta_G/RT)
 
 
 def sum_exponentials(energies):
-    """ 
-    Return the sum of the exponentials 
+    """
+    Return the sum of the exponentials
 	"""
 
-    return sum([ exponential(energy) for energy in energies])
+    return sum(map(exponential, energies))
 
 
 # partition function
 distribution = sum_exponentials(delta_Gs)
-print("partition function 		Q = {0:.2f}".format(distribution))
+print("partition function     Q = {0:.2f}".format(distribution))
 print("conformational entropy S = {0:.2f}".format( RT * log(distribution)))
 
 ## TODO: this is sooo wrong
