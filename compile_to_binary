@@ -17,11 +17,8 @@ case ${src##*.} in
 		stat=$?
 		;;
 	c)
-		gcc $options -o $out $src
-		stat=$?
-		;;
-	c)
 		gcc $coptions $src -o $out 
+		stat=$?
 		;;
 	*)
 		echo "Don't know how to do that yet"
