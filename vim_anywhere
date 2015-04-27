@@ -5,7 +5,7 @@ file="${dir}"/doc-"$( date +"%y%m%d%H%M%S")"
 [[ -d "$dir" ]] || mkdir -p /tmp/vim-anywhere
 
 touch "$file"
-mvim --nofork "$file"
+gvim --nofork "$file"
 pbcopy < "$file"
 
 # vim: ft=sh

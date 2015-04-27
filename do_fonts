@@ -10,11 +10,7 @@ readonly workingd="$PWD"
 
 main ()
 {
-	set -x
 	fc-cache -v &&  mkfontscale &&  mkfontdir
-	set +x
-	
-	return
 }
 
 main

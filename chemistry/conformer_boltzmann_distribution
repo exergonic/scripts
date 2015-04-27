@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 '''
 ABOUT
 
@@ -41,40 +40,33 @@ if len(argv[1:]) == 0:
     print("Input the deltaG values as arguments to this script.")
     exit(0)
 
-delta_Gs = [float(i) for i in argv[1:]]
+delta_Gs = map(float, argv[1:])
 
 # gas constant times 298K
 RT = 0.5921
 
-def exponential(delta_G):
-    """
-    Return value of exp(-delta_G/RT). T = 298K
-    """
 
+def exponential(delta_G):
     return exp(-delta_G/RT)
 
 
 def sum_exponentials(energies):
-    """
-    Return the sum of the exponentials
-	"""
-
     return sum(map(exponential, energies))
 
 
 # partition function
 distribution = sum_exponentials(delta_Gs)
-print("partition function     Q = {0:.2f}".format(distribution))
-print("conformational entropy S = {0:.2f}".format( RT * log(distribution)))
 
-## TODO: this is sooo wrong
-## total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
-#equilibrium_population_energy = RT * log(distribution)
-#print("Total equilibrium population energy: %f"
+print("partition function     Q = {0:.2f}".format(distribution))
+print("conformational entropy S = {0:.2f}".format(RT * log(distribution)))
+
+# TODO: this is sooo wrong
+# total equilibrium energy [Cramer. Essentials of Comp Chem. Equation 10.50]
+# equilibrium_population_energy = RT * log(distribution)
+# print("Total equilibrium population energy: %f"
 #      % equilibrium_population_energy)
 
 print("Relative Abundances")
 for delta_G in delta_Gs:
     percent_abundance = exponential(delta_G) / distribution * 100
     print("\t%.2f: %.2f%%" % (delta_G, percent_abundance))
-

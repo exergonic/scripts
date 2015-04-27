@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+eval $( keychain --eval id_rsa 56146040)
+

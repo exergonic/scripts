@@ -1,50 +1,45 @@
-def return_interval(string, delim1, delim2):
-    '''
-    Return the range in a string that is delimited by delim1 and delim2
-    '''
+#!/usr/bin/env python3
 
-    return (string.find(delim1), string.find(delim2) - 1)
+# ^^ only to get rid of omnicomplete warnings
 
+# creating translation tables for characters
 '''
-creating translation tables for characters
-'''
-
-trans_table = str.maketrans("abc", "def")
-result = "aabbcc".translate(trans_table)
-'''
+>>> trans_table = str.maketrans("abc", "def")
+>>> result = "aabbcc".translate(trans_table)
 >>> print(result)
 "ddeeff"
 '''
 
-# to remove certain characters
-trans_table = str.maketrans('abcde', '     ')
-value = 'abcdefg'
-value.translate(trans_table)
-
 '''
->>> print(value)
-'     fg'
-'''
-
-#
-trans_table = str.maketrans("78", "12", "9")
-# 7 and 8 are translated to 1 and 2. 9 is translated to None
-value = "123456789"
-result = value.translate(trans_table)
-
-'''
+>>> trans_table = str.maketrans("78", "12", "9")
+>>> value = "123456789"
+>>> result = value.translate(trans_table)
 >>> print(result)
 12345612    # 9 has been removed
 '''
 
+# Easier strings
+'''
+>>> derp = "america fuck yeah"
+>>> # str.format_map takes dict
+>>> print("Sometimes, all I can say is {derp}".format_map(locals()))
+"Sometimes, all I can say is america fuck yeah."
+'''
+
+# Flatten a list
+'''
+>>> a = [["a"], ["b"], ["c"]]
+>>> [ i for j in a for i in j]
+["a", "b", "c"]
+'''
 
 # Very simple webserver ~~~~~~~~~~~~~~~~~~~~
 '''
 >>> python -m http.server [port]
 '''
 
-
 # Classes ~~~~~~~~~~~~~~~~~~~~
+
 
 class Dog:
     kind = 'canine'
@@ -52,14 +47,14 @@ class Dog:
     def __init__(self, name):
         self.name = name
 
+
 # Higher order functions~~~~~~~~~~~~~~~
 
 # returning a closure
 # or "factory of functions"
 
-
-def addn(n):
-    return lambda x: x + n
+def addn(nm):
+    return lambda x: x + nm
 
 '''
 >>> add1 = addn(1)
@@ -95,7 +90,7 @@ class foo:
         self.n = n
 
     def __call__(self, i):
-        self.n = i + n
+        self.n = i + self.n
 
 '''
 >>> a = foo(1)
@@ -108,15 +103,15 @@ class foo:
 '''
 
 
-def foo(n):
+def moop(n):
     # using a function
-    def innerfoo(i):
+    def innermoop(i):
         nonlocal n
         n += i
         return n
-    return innerfoo
+    return innermoop
 '''
->>> a = foo(2)
+>>> a = moop(2)
 >>> a(4)
 6
 >>> a(10)
@@ -125,16 +120,14 @@ def foo(n):
 20
 '''
 
-"""
-zip
-
+# zip
+'''
 >>> list(zip("abcd", "123"))
 [('a', '0'), ('b', '1'), ('c', '2'), ('d', '3')]
-"""
+'''
 
-"""
-compress: takes a list and maps it onto a truth list
-
->>> list(compress("ABCD", "1010"))
-['A', 'B', 'C', 'D']
-"""
+# compress: takes a list and maps it onto a truth list
+'''
+>>> list(compress("ABCD", [0, 1, 0, 1]))
+['B', 'D']
+'''

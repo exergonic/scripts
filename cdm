@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# cd into a directory from a menu
+ps3="select a directory #: "
+dirs=($( find . -mindepth 1 -maxdepth 1 -type d ! -path "./.??*" | sort))
+#
+select dir in ${dirs[@]}
+do
+	builtin cd "$dir" && ls
+	break
+done

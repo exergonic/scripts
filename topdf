@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+enscript --quiet --no-header --output=- ${1}  | ps2pdf - ${1%.*}.pdf
+

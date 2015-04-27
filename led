@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+
+from sys import argv
+from sys import exit
+
+if argv[1].isdigit():
+    digits = argv[1]
+else:
+    print("gimme digits, fucko")
+    exit(1)
+
+leds = {"0": [" _  ", "| | ", "|_| "],
+        "1": ["  ", "| ", "| "],
+        "2": [" _  ", " _| ", "|_  "],
+        "3": ["_  ", "_| ", "_| "],
+        "4": ["    ", "|_| ", "  | "],
+        "5": [" _  ", "|_  ", " _| "],
+        "6": [" _  ", "|_  ", "|_| "],
+        "7": ["_   ", " |  ", " |  "],
+        "8": [" _  ", "|_| ", "|_| "],
+        "9": [" _  ", "|_| ", " _| "]
+        }
+
+
+def get_row(num):
+    return ''.join([leds[i][num] for i in list(digits)])
+
+print("{}\n{}\n{}".format(get_row(0), get_row(1), get_row(2)))
