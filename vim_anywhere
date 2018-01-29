@@ -6,6 +6,6 @@ file="${dir}"/doc-"$( date +"%y%m%d%H%M%S")"
 
 touch "$file"
 gvim --nofork "$file"
-pbcopy < "$file"
+xclip -selection clipboard < "$file"
 
 # vim: ft=sh
