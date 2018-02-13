@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+_header()
+{
+	echo "┏━┓┏━┓┏┳┓┏━┓┏━╸┏┳┓   ┏━╸╻  ╻"
+	echo "┗━┓┃ ┃┃┃┃┣━┫┣╸ ┃┃┃╺━╸┃  ┃  ┃"
+	echo "┗━┛┗━┛╹ ╹╹ ╹╹  ╹ ╹   ┗━╸┗━╸╹"
+}
+
+if [[ -z $(which curl) ]]; then
+	echo "This script depends on cURL, make sure it's installed and in your path."
+	return 0
+fi
+
+if [[ -z $(which mpv) ]]; then
+	echo "This script depends on mpv, make sure it's installed and in your path."
+	return 0
+fi
+
+if [[ "$1" =~ "-h" ]]; then
+	_header
+	echo
+	echo "NAME:         somafm-cli - Listen to SomaFM radio stations."
+	echo
+	echo "SYNOPSIS:     somafm-cli [OPTION] [STATION]"
+	echo
+	echo "DEPENCIES:    cURL and mpv."
+	echo
+	echo "OPTIONS:"
+	echo
+	echo "-h            Help; display this help."
+	echo "-s            Station; autoplay given station."
+	echo
+	echo "WEB:          <http://somafm.com>"
+	return 0
+fi
+
+if [[ "$1" = "-s" ]]; then
+	mpv --cache=no http://somafm.com/startstream=$2.pls
+	return 0
+fi
+
+_header
+echo
+echo "SomaFM • Commercial-Free Internet Radio"
+echo
+echo "Stations:"
+echo
+curl -s http://somafm.com/ | awk -F '[/".]' '/li class="cbshort/ { print $5 }' | sed 's/^/::: /' | sort
+echo
+read -p "Select: " _reply
+mpv --cache=no http://somafm.com/startstream=$_reply.pls
+
+exit $?

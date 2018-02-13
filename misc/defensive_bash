@@ -5,7 +5,14 @@ readonly PROGNAME=$(basename $0)
 readonly PROGDIR=$(readlink -m $(dirname $0))
 readonly ARGS="$@"
 
-func ()
+function die
+{
+    echo "ERROR: $1" >$2
+}
+
+function foo
 {
 	local var=localvar #everything is local
 }
+
+# vim: ft=sh
