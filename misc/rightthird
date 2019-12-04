@@ -1,2 +1,2 @@
-getactivewindow windowsize 30% 100% windowmove 1400 0 
+xdotool getactivewindow windowsize 30% 100% windowmove 1366 0 
 

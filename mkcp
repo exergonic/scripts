@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-# cp's files into newdir, specified as last argument
-mkdir -p -- "${args:-1}" && cp -- "$args"
-
